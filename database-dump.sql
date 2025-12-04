@@ -93,11 +93,11 @@ CREATE TABLE IF NOT EXISTS jual_detail (
 
 ----------------------------- DATA DUMMY -----------------------------
 
--- Insert Users
+-- Insert Users: Passwords are bcrypt hashed
 INSERT INTO users (username, password, email, full_name, role) VALUES
-('admin', '$2a$10$xyz123', 'admin@warehouse.com', 'Administrator System', 'admin'),
-('staff1', '$2a$10$xyz456', 'staff1@warehouse.com', 'Staff Gudang A', 'staff'),
-('staff2', '$2a$10$xyz789', 'staff2@warehouse.com', 'Staff Gudang B', 'staff');
+('admin', '$2a$10$SLvSsMu6kbS5CsZcswlOlOpDDMYVPhOT3hlq15XZGFQe15IoTZOr6', 'admin@warehouse.com', 'Administrator System', 'admin'), -- Password: Admin123!
+('staff1', '$2a$10$z7BgTYBk3jonuRV76Gn8jO7OKBkengAZelCHZQj0CzpGJof3srR7G', 'staff1@warehouse.com', 'Staff Gudang A', 'staff'), -- Password: Staff1GDA!
+('staff2', '$2a$10$t.57bYH7QMj7i9cKGVBvUOP33pNzDt69knzcYxbYaLDc4qt2eFm56', 'staff2@warehouse.com', 'Staff Gudang B', 'staff'); -- Password: Staff2GDB!
 
 -- Insert Master Barang
 INSERT INTO master_barang (kode_barang, nama_barang, deskripsi, satuan, harga_beli, harga_jual) VALUES
