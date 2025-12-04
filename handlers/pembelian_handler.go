@@ -107,7 +107,9 @@ func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(data)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": data,
+	})
 }
 
 // GetPembelianByID adalah method untuk pengambilan data pembelian berdasarkan ID
@@ -123,5 +125,8 @@ func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(data)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"header":  data,
+		"details": data.Details,
+	})
 }

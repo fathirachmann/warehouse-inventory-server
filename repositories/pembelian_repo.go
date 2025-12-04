@@ -105,7 +105,7 @@ func (r *PembelianRepository) CreatePembelian(header *models.BeliHeader, details
 // GetAllPembelian mengambil semua data pembelian beserta detailnya
 func (r *PembelianRepository) GetAllPembelian() ([]models.BeliHeader, error) {
 	var headers []models.BeliHeader
-	if err := r.db.Preload("Details").Find(&headers).Error; err != nil {
+	if err := r.db.Preload("Details.MasterBarang").Preload("User").Find(&headers).Error; err != nil {
 		return nil, err
 	}
 	return headers, nil
@@ -114,7 +114,7 @@ func (r *PembelianRepository) GetAllPembelian() ([]models.BeliHeader, error) {
 // GetPembelianByID mengambil data pembelian berdasarkan ID beserta detailnya
 func (r *PembelianRepository) GetPembelianByID(id uint) (*models.BeliHeader, error) {
 	var header models.BeliHeader
-	if err := r.db.Preload("Details").First(&header, id).Error; err != nil {
+	if err := r.db.Preload("Details.MasterBarang").Preload("User").First(&header, id).Error; err != nil {
 		return nil, err
 	}
 	return &header, nil
