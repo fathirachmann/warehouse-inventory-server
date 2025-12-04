@@ -59,10 +59,12 @@ func main() {
 	historyRoute := app.Group("/api/history-stok", middleware.Authentication())
 	stokHandler.RegisterHistoryRoute(historyRoute)
 
-	// 3. Implement: Transaksi - Pembelian routes (Guarded with JWT middleware)
-	// POST Create pembelian - /api/pembelian
-	// GET all pembelian - /api/pembelian
-	// GET pembelian by ID - /api/pembelian/:id
+	// Pembelian routes
+	pembelianRepo := repositories.NewPembelianRepository(db)
+	pembelianHandler := handlers.NewPembelianHandler(pembelianRepo, stokRepo)
+
+	pembelianRoute := app.Group("/api/pembelian", middleware.Authentication())
+	pembelianHandler.RegisterRoute(pembelianRoute)
 
 	// 4, Implement: Transaksi - Penjualan routes (Guarded with JWT middleware)
 	// POST Create penjualan - /api/penjualan
