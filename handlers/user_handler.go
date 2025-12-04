@@ -75,7 +75,7 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 		Email:    req.Email,
 		Password: string(hashed),
 		FullName: req.FullName,
-		Role:     "user",
+		Role:     "staff",
 	}
 
 	if err := h.repo.Create(&userInput); err != nil {
