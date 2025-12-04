@@ -15,6 +15,6 @@ type HistoryStok struct {
 	UpdatedAt      time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Associations
-	MasterBarang MasterBarang `gorm:"foreignKey:BarangID;references:ID" json:"master_barang"`
-	Users        User         `gorm:"foreignKey:UserID;references:ID" json:"user"`
+	MasterBarang MasterBarang `gorm:"foreignKey:BarangID;references:ID" json:"master_barang"` // HistoryStok many to one MasterBarang
+	Users        User         `gorm:"foreignKey:UserID;references:ID" json:"user"`            // HistoryStok many to one User
 }
