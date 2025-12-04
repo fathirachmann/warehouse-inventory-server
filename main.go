@@ -5,35 +5,41 @@ import (
 	"os"
 
 	"warehouse-inventory-server/config"
+	"warehouse-inventory-server/handlers"
+	"warehouse-inventory-server/repositories"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-	port := os.Getenv(`PORT`)
-
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err.Error())
-	}
+	// Load env (optional, don’t fail hard on missing)
+	_ = godotenv.Load()
 
 	db, err := config.InitDB()
 	if err != nil {
-		log.Fatalf("failed to connect database: %v", err.Error())
+		log.Fatalf("failed to connect database: %v", err)
 	}
-
 	log.Println("database connected")
-	_ = db
 
 	app := fiber.New()
 
-	// Server health check endpoint
+	// Health check
 	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"status": "Healthy",
-		})
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "Healthy"})
 	})
 
-	app.Listen(":" + port)
+	// Barang routes
+	barangRepo := repositories.NewBarangRepository(db)
+	barangHandler := handlers.NewBarangHandler(barangRepo)
+	barangRoute := app.Group("/api/barang")
+	barangHandler.RegisterRoute(barangRoute)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	if err := app.Listen(":" + port); err != nil {
+		log.Fatalf("server failed: %v", err)
+	}
 }
