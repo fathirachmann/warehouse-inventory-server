@@ -104,7 +104,9 @@ func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(data)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": data,
+	})
 }
 
 func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
@@ -119,5 +121,8 @@ func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(data)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"header":  data,
+		"details": data.Details,
+	})
 }

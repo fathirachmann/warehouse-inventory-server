@@ -116,7 +116,7 @@ func (r *PenjualanRepository) CreatePenjualan(header *models.JualHeader, details
 // GetAllPenjualan mengambil semua data penjualan beserta detailnya
 func (r *PenjualanRepository) GetAllPenjualan() ([]models.JualHeader, error) {
 	var headers []models.JualHeader
-	if err := r.db.Preload("Details").Find(&headers).Error; err != nil {
+	if err := r.db.Preload("Details.MasterBarang").Preload("User").Find(&headers).Error; err != nil {
 		return nil, err
 	}
 	return headers, nil
@@ -125,7 +125,7 @@ func (r *PenjualanRepository) GetAllPenjualan() ([]models.JualHeader, error) {
 // GetPenjualanByID mengambil data penjualan berdasarkan ID beserta detailnya
 func (r *PenjualanRepository) GetPenjualanByID(id uint) (*models.JualHeader, error) {
 	var header models.JualHeader
-	if err := r.db.Preload("Details").First(&header, id).Error; err != nil {
+	if err := r.db.Preload("Details.MasterBarang").Preload("User").First(&header, id).Error; err != nil {
 		return nil, err
 	}
 	return &header, nil
