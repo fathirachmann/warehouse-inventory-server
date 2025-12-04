@@ -66,10 +66,12 @@ func main() {
 	pembelianRoute := app.Group("/api/pembelian", middleware.Authentication())
 	pembelianHandler.RegisterRoute(pembelianRoute)
 
-	// 4, Implement: Transaksi - Penjualan routes (Guarded with JWT middleware)
-	// POST Create penjualan - /api/penjualan
-	// GET all penjualan - /api/penjualan
-	// GET penjualan by ID - /api/penjualan/:id
+	// Penjualan routes
+	penjualanRepo := repositories.NewPenjualanRepository(db)
+	penjualanHandler := handlers.NewPenjualanHandler(penjualanRepo, stokRepo)
+
+	penjualanRoute := app.Group("/api/penjualan", middleware.Authentication())
+	penjualanHandler.RegisterRoute(penjualanRoute)
 
 	port := os.Getenv("PORT")
 
