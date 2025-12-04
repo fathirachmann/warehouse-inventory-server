@@ -23,9 +23,9 @@ func NewBarangHandler(repo *repositories.BarangRepository) *BarangHandler {
 func (h *BarangHandler) RegisterRoute(r fiber.Router) {
 	r.Get("/", h.GetBarang)
 	r.Get("/:id", h.GetBarangByID)
-	r.Post("/", h.CreateBarang, middleware.GuardAdmin())
-	r.Put("/:id", h.UpdateBarangByID, middleware.GuardAdmin())
-	r.Delete("/:id", h.DeleteBarangByID, middleware.GuardAdmin())
+	r.Post("/", middleware.GuardAdmin(), h.CreateBarang)
+	r.Put("/:id", middleware.GuardAdmin(), h.UpdateBarangByID)
+	r.Delete("/:id", middleware.GuardAdmin(), h.DeleteBarangByID)
 }
 
 func (h *BarangHandler) GetBarang(c *fiber.Ctx) error {

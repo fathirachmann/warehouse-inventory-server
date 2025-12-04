@@ -9,6 +9,7 @@ import (
 	"warehouse-inventory-server/middleware"
 	"warehouse-inventory-server/models"
 	"warehouse-inventory-server/repositories"
+	"warehouse-inventory-server/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -17,7 +18,7 @@ import (
 
 // Route Handlers
 func (h *UserHandler) RegisterRoute(r fiber.Router) {
-	r.Post("/register", h.Register, middleware.Authentication(), middleware.GuardAdmin()) // Simple Authorization: Only admin can register new staff
+	r.Post("/register", middleware.Authentication(), middleware.GuardAdmin(), h.Register) // Simple Authorization: Only admin can register new staff
 	r.Post("/login", h.Login)
 }
 
@@ -61,9 +62,9 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Email sudah digunakan"})
 	}
 
-	pwdRegex := regexp.MustCompile(`^[a-zA-Z0-9!@#$%^&*]{8,}$`)
-	if !pwdRegex.MatchString(req.Password) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Password minimal 8 karakter, mengandung huruf dan angka dan spesial karakter"})
+	// Password complexity validation
+	if !utils.ValidatePassword(req.Password) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Password harus minimal 8 karakter, mengandung huruf, angka, dan karakter spesial"})
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
@@ -88,9 +89,9 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	}
 
 	registerResponse := models.RegisterResponse{
-		Username: user.Username,
-		Email:    user.Email,
-		FullName: user.FullName,
+		Username: userInput.Username,
+		Email:    userInput.Email,
+		FullName: userInput.FullName,
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
