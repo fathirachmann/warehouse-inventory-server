@@ -28,25 +28,19 @@ func (h *PenjualanHandler) RegisterRoute(r fiber.Router) {
 	r.Get("/:id", h.GetPenjualanByID)
 }
 
-type jualDetailRequest struct {
-	BarangID uint    `json:"barang_id"`
-	Qty      int     `json:"qty"`
-	Harga    float64 `json:"harga"`
-}
-
-type jualHeaderRequest struct {
-	NoFaktur string              `json:"no_faktur"`
-	Customer string              `json:"customer"`
-	Details  []jualDetailRequest `json:"details"`
-}
-
 func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
-	var req jualHeaderRequest
+	var req models.JualHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid body"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
 	}
-	if req.NoFaktur == "" || req.Customer == "" || len(req.Details) == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no_faktur, customer, and details are required"})
+
+	switch {
+	case req.NoFaktur == "":
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no_faktur tidak boleh kosong"})
+	case req.Customer == "":
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "customer tidak boleh kosong"})
+	case len(req.Details) == 0:
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "details tidak boleh kosong"})
 	}
 
 	var userID uint
@@ -88,23 +82,32 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	header.Total = total
 
 	if err := h.repo.CreatePenjualan(&header, details); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+			"error":  err.Error(),
+		})
 	}
 
 	// Update stok & history untuk setiap detail (stok keluar)
 	for _, d := range details {
 		stok, err := h.stokRepo.GetOrCreateByBarangID(d.BarangID)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"status": "Server error",
+				"error":  err.Error(),
+			})
 		}
 		stokSebelum := stok.StokAkhir
 		stokSesudah := stokSebelum - d.Qty
 		if stokSesudah < 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "stok cannot be negative"})
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Stok tidak mencukupi"})
 		}
 		stok.StokAkhir = stokSesudah
 		if err := h.stokRepo.UpdateStok(stok); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"status": "Server error",
+				"error":  err.Error(),
+			})
 		}
 
 		history := models.HistoryStok{
@@ -114,16 +117,22 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 			Jumlah:         d.Qty,
 			StokSebelumnya: stokSebelum,
 			StokSesudah:    stokSesudah,
-			Keterangan:     "penjualan " + header.NoFaktur,
+			Keterangan:     "Penjualan " + header.NoFaktur,
 		}
 		if err := h.stokRepo.CreateHistory(&history); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"status": "Server error",
+				"error":  err.Error(),
+			})
 		}
 	}
 
 	created, err := h.repo.GetPenjualanByID(header.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+			"error":  err.Error(),
+		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(created)
@@ -132,9 +141,12 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPenjualan()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+			"error":  err.Error(),
+		})
 	}
-	return c.JSON(data)
+	return c.Status(fiber.StatusOK).JSON(data)
 }
 
 func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
@@ -144,7 +156,10 @@ func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 	}
 	data, err := h.repo.GetPenjualanByID(uint(id))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+			"error":  err.Error(),
+		})
 	}
-	return c.JSON(data)
+	return c.Status(fiber.StatusOK).JSON(data)
 }

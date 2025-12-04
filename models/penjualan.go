@@ -37,3 +37,15 @@ type JualDetail struct {
 func (JualDetail) TableName() string {
 	return "jual_detail"
 }
+
+type JualDetailRequest struct {
+	BarangID uint    `json:"barang_id"`
+	Qty      int     `json:"qty"`
+	Harga    float64 `json:"harga"`
+}
+
+type JualHeaderRequest struct {
+	NoFaktur string              `json:"no_faktur"`
+	Customer string              `json:"customer"`
+	Details  []JualDetailRequest `json:"details"`
+}
