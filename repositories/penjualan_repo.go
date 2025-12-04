@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 
 	"warehouse-inventory-server/models"
 
@@ -41,8 +42,15 @@ func (r *PenjualanRepository) CreatePenjualan(header *models.JualHeader, details
 		}
 	}
 
-	// Buat header penjualan
+	// Buat header penjualan untuk mendapatkan ID
 	if err := tx.Create(header).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Generate NoFaktur berdasarkan ID: JUAL + 3 digit (misal JUAL001)
+	header.NoFaktur = fmt.Sprintf("JUAL%03d", header.ID)
+	if err := tx.Model(header).Update("no_faktur", header.NoFaktur).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

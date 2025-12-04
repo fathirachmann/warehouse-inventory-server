@@ -35,8 +35,6 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	}
 
 	switch {
-	case req.NoFaktur == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no_faktur tidak boleh kosong"})
 	case req.Customer == "":
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "customer tidak boleh kosong"})
 	case len(req.Details) == 0:
@@ -56,7 +54,6 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	}
 
 	header := models.JualHeader{
-		NoFaktur:  req.NoFaktur,
 		Customer:  req.Customer,
 		UserID:    userID,
 		Status:    "selesai",
@@ -86,45 +83,6 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 			"status": "Server error",
 			"error":  err.Error(),
 		})
-	}
-
-	// Update stok & history untuk setiap detail (stok keluar)
-	for _, d := range details {
-		stok, err := h.stokRepo.GetOrCreateByBarangID(d.BarangID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status": "Server error",
-				"error":  err.Error(),
-			})
-		}
-		stokSebelum := stok.StokAkhir
-		stokSesudah := stokSebelum - d.Qty
-		if stokSesudah < 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Stok tidak mencukupi"})
-		}
-		stok.StokAkhir = stokSesudah
-		if err := h.stokRepo.UpdateStok(stok); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status": "Server error",
-				"error":  err.Error(),
-			})
-		}
-
-		history := models.HistoryStok{
-			BarangID:       d.BarangID,
-			UserID:         userID,
-			JenisTransaksi: "keluar",
-			Jumlah:         d.Qty,
-			StokSebelumnya: stokSebelum,
-			StokSesudah:    stokSesudah,
-			Keterangan:     "Penjualan " + header.NoFaktur,
-		}
-		if err := h.stokRepo.CreateHistory(&history); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status": "Server error",
-				"error":  err.Error(),
-			})
-		}
 	}
 
 	created, err := h.repo.GetPenjualanByID(header.ID)
