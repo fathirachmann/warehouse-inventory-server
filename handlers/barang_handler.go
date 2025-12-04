@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	"warehouse-inventory-server/middleware"
@@ -33,7 +34,10 @@ func (h *BarangHandler) GetBarang(c *fiber.Ctx) error {
 	limit, _ := strconv.Atoi(c.Query("limit"))
 	items, total, err := h.repo.List(search, page, limit)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Println("Error fetching barang list:", err.Error(), "barang_handler.go:GetBarang", "Error at line 36")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+		})
 	}
 	return c.Status(200).JSON(fiber.Map{
 		"data": items,
