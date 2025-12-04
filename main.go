@@ -42,14 +42,14 @@ func main() {
 	authRoute := app.Group("/api/auth")
 	userHandler.RegisterRoute(authRoute)
 
-	// Barang routes
+	// Barang routes (admin only for write operations implied by handler, but we guard whole group as admin)
 	barangRepo := repositories.NewBarangRepository(db)
 	barangHandler := handlers.NewBarangHandler(barangRepo)
 
 	barangRoute := app.Group("/api/barang", middleware.Authentication())
 	barangHandler.RegisterRoute(barangRoute)
 
-	// Stock routes
+	// Stock routes (viewable by both admin and staff)
 	stokRepo := repositories.NewStokRepository(db)
 	stokHandler := handlers.NewStokHandler(stokRepo)
 
@@ -59,14 +59,14 @@ func main() {
 	historyRoute := app.Group("/api/history-stok", middleware.Authentication())
 	stokHandler.RegisterHistoryRoute(historyRoute)
 
-	// Pembelian routes
+	// Pembelian routes (admin and staff allowed per requirement)
 	pembelianRepo := repositories.NewPembelianRepository(db)
 	pembelianHandler := handlers.NewPembelianHandler(pembelianRepo, stokRepo)
 
 	pembelianRoute := app.Group("/api/pembelian", middleware.Authentication())
 	pembelianHandler.RegisterRoute(pembelianRoute)
 
-	// Penjualan routes
+	// Penjualan routes (admin and staff allowed per requirement)
 	penjualanRepo := repositories.NewPenjualanRepository(db)
 	penjualanHandler := handlers.NewPenjualanHandler(penjualanRepo, stokRepo)
 
