@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"os"
 	"regexp"
 	"time"
@@ -67,7 +68,10 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Hash password gagal"})
+		log.Println("Error hashing password during registration:", err.Error(), "user_handler.go:Register", "Error at line 72")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+		})
 	}
 
 	// Create user
@@ -127,7 +131,7 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	secret := os.Getenv("JWT_SECRET")
 
 	claims := jwt.MapClaims{
-		"sub":   user.ID,
+		"id":    user.ID,
 		"email": user.Email,
 		"role":  user.Role,
 		"exp":   time.Now().Add(24 * time.Hour).Unix(),
@@ -137,17 +141,13 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	signedToken, err := token.SignedString([]byte(secret))
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "generate token gagal"})
+		log.Println("Error signing JWT token during login:", err.Error(), "user_handler.go:Login", "Error at line 144")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"token": signedToken,
-		"user": fiber.Map{
-			"id":        user.ID,
-			"username":  user.Username,
-			"email":     user.Email,
-			"full_name": user.FullName,
-			"role":      user.Role,
-		},
+		"token": signedToken, // Token sudah termasuk data claims user
 	})
 }

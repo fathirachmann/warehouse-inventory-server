@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"strconv"
 
 	"warehouse-inventory-server/repositories"
@@ -32,9 +33,9 @@ func (h *StokHandler) RegisterHistoryRoute(r fiber.Router) {
 func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllStok()
 	if err != nil {
+		log.Println("Error fetching all stok:", err.Error(), "stok_handler.go:GetAllStok", "Error at line 36")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
-			"error":  err.Error(),
 		})
 	}
 	return c.Status(200).JSON(fiber.Map{
@@ -52,9 +53,9 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 
 	stok, err := h.repo.GetOrCreateByBarangID(uint(barangID64))
 	if err != nil {
+		log.Println("Error fetching stok by barang ID:", err.Error(), "stok_handler.go:GetStokByBarangID", "Error at line 56")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
-			"error":  err.Error(),
 		})
 	}
 
@@ -83,9 +84,9 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 	offset := (page - 1) * limit
 	data, total, err := h.repo.GetHistory(0, limit, offset)
 	if err != nil {
+		log.Println("Error fetching all history stok:", err.Error(), "stok_handler.go:GetHistoryAll", "Error at line 87")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
-			"error":  err.Error(),
 		})
 	}
 
@@ -118,7 +119,10 @@ func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	offset := (page - 1) * limit
 	data, total, err := h.repo.GetHistory(uint(barangID64), limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Println("Error fetching history by barang ID:", err.Error(), "stok_handler.go:GetHistoryByBarangID", "Error at line 123")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "Server error",
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{

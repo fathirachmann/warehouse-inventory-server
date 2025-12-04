@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"time"
 
 	"warehouse-inventory-server/models"
@@ -45,7 +46,7 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 
 	var userID uint
 	if claims, ok := c.Locals("user").(jwt.MapClaims); ok {
-		if sub, ok := claims["sub"]; ok {
+		if sub, ok := claims["id"]; ok {
 			switch v := sub.(type) {
 			case float64:
 				userID = uint(v)
@@ -81,17 +82,17 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	header.Total = total
 
 	if err := h.repo.CreatePembelian(&header, details); err != nil {
+		log.Println("Error CreatePembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 84")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
-			"error":  err.Error(),
 		})
 	}
 
 	created, err := h.repo.GetPembelianByID(header.ID)
 	if err != nil {
+		log.Println("Error fetching created pembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 91")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
-			"error":  err.Error(),
 		})
 	}
 
@@ -102,9 +103,9 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPembelian()
 	if err != nil {
+		log.Println("Error fetching all pembelian:", err.Error(), "pembelian_handler.go:GetAllPembelian", "Error at line 104")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
-			"error":  err.Error(),
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -120,9 +121,9 @@ func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 	}
 	data, err := h.repo.GetPembelianByID(uint(id))
 	if err != nil {
+		log.Println("Error fetching pembelian by ID:", err.Error(), "pembelian_handler.go:GetPembelianByID", "Error at line 122")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
-			"error":  err.Error(),
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
