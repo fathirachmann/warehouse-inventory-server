@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"warehouse-inventory-server/models"
 
 	"gorm.io/gorm"
@@ -15,7 +16,14 @@ func NewBarangRepository(db *gorm.DB) *BarangRepository {
 }
 
 func (r *BarangRepository) Create(b *models.MasterBarang) error {
-	return r.db.Create(b).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(b).Error; err != nil {
+			return err
+		}
+		// Auto generate KodeBarang: BRG + ID (e.g. BRG001)
+		b.KodeBarang = fmt.Sprintf("BRG%03d", b.ID)
+		return tx.Save(b).Error
+	})
 }
 
 func (r *BarangRepository) Update(b *models.MasterBarang) error {

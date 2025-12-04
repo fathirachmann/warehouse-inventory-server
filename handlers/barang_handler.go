@@ -64,8 +64,6 @@ func (h *BarangHandler) CreateBarang(c *fiber.Ctx) error {
 	}
 
 	switch {
-	case payload.KodeBarang == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "kode barang tidak boleh kosong"})
 	case payload.NamaBarang == "":
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "nama barang tidak boleh kosong"})
 	case payload.Satuan == "":
