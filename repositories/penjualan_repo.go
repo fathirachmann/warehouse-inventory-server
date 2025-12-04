@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"errors"
+
 	"warehouse-inventory-server/models"
 
 	"gorm.io/gorm"
@@ -14,24 +16,96 @@ func NewPenjualanRepository(db *gorm.DB) *PenjualanRepository {
 	return &PenjualanRepository{db: db}
 }
 
-// CreatePenjualan menyimpan header + detail penjualan dalam satu transaksi
+// CreatePenjualan adalah method untuk menyimpan header + detail penjualan dalam satu transaksi
 func (r *PenjualanRepository) CreatePenjualan(header *models.JualHeader, details []models.JualDetail) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(header).Error; err != nil {
+	// Mulai transaksi
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Validasi stok sebelum melakukan perubahan
+	for _, d := range details {
+		var stok models.Mstok
+		if err := tx.Where("barang_id = ?", d.BarangID).First(&stok).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				tx.Rollback()
+				return errors.New("stok tidak mencukupi")
+			}
+			tx.Rollback()
 			return err
 		}
-		for i := range details {
-			details[i].JualHeaderID = header.ID
+		if stok.StokAkhir < d.Qty {
+			tx.Rollback()
+			return errors.New("stok tidak mencukupi")
 		}
-		if len(details) > 0 {
-			if err := tx.Create(&details).Error; err != nil {
-				return err
+	}
+
+	// Buat header penjualan
+	if err := tx.Create(header).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Update stok & buat history untuk setiap detail (stok keluar)
+	for i := range details {
+		details[i].JualHeaderID = header.ID
+		// ambil stok terbaru dalam transaksi
+		var stok models.Mstok
+		if err := tx.Where("barang_id = ?", details[i].BarangID).First(&stok).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				tx.Rollback()
+				return errors.New("stok tidak ditemukan")
 			}
+			tx.Rollback()
+			return err
 		}
-		return nil
-	})
+		stokSebelum := stok.StokAkhir
+		stokSesudah := stokSebelum - details[i].Qty
+		if stokSesudah < 0 {
+			tx.Rollback()
+			return errors.New("stok tidak mencukupi")
+		}
+		stok.StokAkhir = stokSesudah
+		if err := tx.Save(&stok).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// Buat history stok penjualan
+		history := models.HistoryStok{
+			BarangID:       details[i].BarangID,
+			UserID:         header.UserID,
+			JenisTransaksi: "keluar",
+			Jumlah:         details[i].Qty,
+			StokSebelumnya: stokSebelum,
+			StokSesudah:    stokSesudah,
+			Keterangan:     "Penjualan " + header.NoFaktur,
+		}
+		if err := tx.Create(&history).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// Buat detail penjualan
+	if len(details) > 0 {
+		if err := tx.Create(&details).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// Jika semua operasi berhasil, commit transaksi
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
 }
 
+// GetAllPenjualan mengambil semua data penjualan beserta detailnya
 func (r *PenjualanRepository) GetAllPenjualan() ([]models.JualHeader, error) {
 	var headers []models.JualHeader
 	if err := r.db.Preload("Details").Find(&headers).Error; err != nil {
@@ -40,6 +114,7 @@ func (r *PenjualanRepository) GetAllPenjualan() ([]models.JualHeader, error) {
 	return headers, nil
 }
 
+// GetPenjualanByID mengambil data penjualan berdasarkan ID beserta detailnya
 func (r *PenjualanRepository) GetPenjualanByID(id uint) (*models.JualHeader, error) {
 	var header models.JualHeader
 	if err := r.db.Preload("Details").First(&header, id).Error; err != nil {
