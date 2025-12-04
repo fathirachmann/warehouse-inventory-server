@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"time"
 
+	"warehouse-inventory-server/middleware"
 	"warehouse-inventory-server/models"
 	"warehouse-inventory-server/repositories"
 
@@ -15,7 +16,7 @@ import (
 
 // Route Handlers
 func (h *UserHandler) RegisterRoute(r fiber.Router) {
-	r.Post("/register", h.Register)
+	r.Post("/register", h.Register, middleware.GuardAdmin()) // Simple Authorization: Only admin can register new staff
 	r.Post("/login", h.Login)
 }
 
