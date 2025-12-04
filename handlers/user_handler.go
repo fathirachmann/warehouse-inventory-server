@@ -17,7 +17,7 @@ import (
 
 // Route Handlers
 func (h *UserHandler) RegisterRoute(r fiber.Router) {
-	r.Post("/register", h.Register, middleware.GuardAdmin()) // Simple Authorization: Only admin can register new staff
+	r.Post("/register", h.Register, middleware.Authentication(), middleware.GuardAdmin()) // Simple Authorization: Only admin can register new staff
 	r.Post("/login", h.Login)
 }
 
