@@ -22,14 +22,14 @@ func NewPembelianHandler(repo *repositories.PembelianRepository, stokRepo *repos
 	}
 }
 
-// RegisterRoute mendaftarkan seluruh endpoint pembelian sesuai main.go
+// RegisterRoute mendaftarkan seluruh endpoint "/api/pembelian"
 func (h *PembelianHandler) RegisterRoute(r fiber.Router) {
 	r.Post("/", h.CreatePembelian)
 	r.Get("/", h.GetAllPembelian)
 	r.Get("/:id", h.GetPembelianByID)
 }
 
-// CreatePembelian meng-handle pembuatan pembelian baru beserta update stok dan history
+// CreatePembelian handle pembuatan pembelian baru beserta update stok dan history
 func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	var req models.BeliHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -90,43 +90,6 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 		})
 	}
 
-	// Update stok & history untuk setiap detail (stok masuk)
-	for _, d := range details {
-		stok, err := h.stokRepo.GetOrCreateByBarangID(d.BarangID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status": "Server error",
-				"error":  err.Error(),
-			})
-		}
-		stokSebelum := stok.StokAkhir
-		stokSesudah := stokSebelum + d.Qty
-		stok.StokAkhir = stokSesudah
-		if err := h.stokRepo.UpdateStok(stok); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status": "Server error",
-				"error":  err.Error(),
-			})
-		}
-
-		history := models.HistoryStok{
-			BarangID:       d.BarangID,
-			UserID:         userID,
-			JenisTransaksi: "masuk",
-			Jumlah:         d.Qty,
-			StokSebelumnya: stokSebelum,
-			StokSesudah:    stokSesudah,
-			Keterangan:     "Pembelian " + header.NoFaktur,
-		}
-		if err := h.stokRepo.CreateHistory(&history); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status": "Server error",
-				"error":  err.Error(),
-			})
-		}
-	}
-
-	// Reload header + details untuk response
 	created, err := h.repo.GetPembelianByID(header.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

@@ -32,7 +32,6 @@ type BeliDetail struct {
 	MasterBarang *MasterBarang `gorm:"foreignKey:BarangID" json:"barang,omitempty"` // BeliDetail many to one MasterBarang
 }
 
-// TableName menentukan nama tabel di database agar persis 'beli_detail'
 func (BeliDetail) TableName() string {
 	return "beli_detail"
 }
