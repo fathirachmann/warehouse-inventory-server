@@ -28,6 +28,7 @@ func (h *StokHandler) RegisterHistoryRoute(r fiber.Router) {
 	r.Get("/:barang_id", h.GetHistoryByBarangID)
 }
 
+// GetAllStok adalah handler untuk mendapatkan semua data stok
 func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllStok()
 	if err != nil {
@@ -36,9 +37,12 @@ func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
-	return c.Status(200).JSON(data)
+	return c.Status(200).JSON(fiber.Map{
+		"data": data,
+	})
 }
 
+// GetStokByBarangID adalah handler untuk mendapatkan data stok berdasarkan barang_id
 func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
@@ -54,11 +58,16 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(200).JSON(stok)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": []any{stok},
+	})
 }
 
-// History handler methods
+// GetHistoryAll adalah handler untuk mendapatkan semua data history stok dengan pagination
 func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
+
+	// Note: Pagination tidak ada di requirement. Namun, untuk frontend agar tidak load data terlalu banyak.
+
 	pageStr := c.Query("page", "1")
 	limitStr := c.Query("limit", "10")
 
@@ -72,7 +81,7 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 	}
 
 	offset := (page - 1) * limit
-	data, err := h.repo.GetHistory(0, limit, offset)
+	data, total, err := h.repo.GetHistory(0, limit, offset)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": "Server error",
@@ -81,12 +90,12 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"page":  page,
-		"limit": limit,
 		"data":  data,
+		"total": total,
 	})
 }
 
+// GetHistoryByBarangID adalah handler untuk mendapatkan data history stok berdasarkan barang_id dengan pagination
 func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
@@ -107,15 +116,13 @@ func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	}
 
 	offset := (page - 1) * limit
-	data, err := h.repo.GetHistory(uint(barangID64), limit, offset)
+	data, total, err := h.repo.GetHistory(uint(barangID64), limit, offset)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(200).JSON(fiber.Map{
-		"page":      page,
-		"limit":     limit,
-		"barang_id": barangID64,
-		"data":      data,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data":  data,
+		"total": total,
 	})
 }

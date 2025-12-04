@@ -11,7 +11,7 @@ type Mstok struct {
 	UpdatedAt time.Time `json:"updated_at"`
 
 	// Associations
-	MasterBarang MasterBarang `gorm:"foreignKey:BarangID;references:ID" json:"master_barang"`
+	MasterBarang MasterBarang `gorm:"foreignKey:BarangID;references:ID" json:"barang"`
 }
 
 func (Mstok) TableName() string {
