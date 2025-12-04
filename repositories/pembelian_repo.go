@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 
 	"warehouse-inventory-server/models"
 
@@ -68,8 +69,15 @@ func (r *PembelianRepository) CreatePembelian(header *models.BeliHeader, details
 		}
 	}
 
-	// Simpan header dan detail pembelian
+	// Simpan header pembelian terlebih dahulu untuk mendapatkan ID
 	if err := tx.Create(header).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Generate NoFaktur berdasarkan ID: BLI + 3 digit (misal BLI001)
+	header.NoFaktur = fmt.Sprintf("BLI%03d", header.ID)
+	if err := tx.Model(header).Update("no_faktur", header.NoFaktur).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

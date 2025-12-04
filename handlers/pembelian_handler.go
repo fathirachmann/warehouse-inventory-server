@@ -37,8 +37,6 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	}
 
 	switch {
-	case req.NoFaktur == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no_faktur tidak boleh kosong"})
 	case req.Supplier == "":
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "supplier tidak boleh kosong"})
 	case len(req.Details) == 0:
@@ -58,7 +56,6 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	}
 
 	header := models.BeliHeader{
-		NoFaktur:  req.NoFaktur,
 		Supplier:  req.Supplier,
 		UserID:    userID,
 		Status:    "selesai",
