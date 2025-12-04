@@ -44,7 +44,6 @@ type BeliDetailRequest struct {
 }
 
 type BeliHeaderRequest struct {
-	NoFaktur string              `json:"no_faktur"`
 	Supplier string              `json:"supplier"`
 	Details  []BeliDetailRequest `json:"details"`
 }
