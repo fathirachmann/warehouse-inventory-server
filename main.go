@@ -14,39 +14,50 @@ import (
 )
 
 func main() {
-	// Load env (optional, don’t fail hard on missing)
+	// Load .env file
 	_ = godotenv.Load()
 
+	// Initialize Database
 	db, err := config.InitDB()
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 	log.Println("database connected")
 
+	// Initialize Fiber app
 	app := fiber.New()
 
 	// Health check
 	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "Healthy"})
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"status":  "healthy",
+			"message": "Warehouse Inventory Server is running",
+		})
 	})
 
 	// Auth routes
 	userRepo := repositories.NewUserRepository(db)
 	userHandler := handlers.NewUserHandler(userRepo)
+
 	authRoute := app.Group("/api/auth")
 	userHandler.RegisterRoute(authRoute)
 
 	// Barang routes
 	barangRepo := repositories.NewBarangRepository(db)
 	barangHandler := handlers.NewBarangHandler(barangRepo)
-	barangRoute := app.Group("/api/barang", middleware.JWTProtected())
+
+	barangRoute := app.Group("/api/barang", middleware.Authentication())
 	barangHandler.RegisterRoute(barangRoute)
 
-	// 2. Implement: Stock routes (Guarded with JWT middleware)
-	// GET all stock - /api/stok
-	// GET stock by barang ID - /api/stok/:barang_id
-	// GET History stock - /api/history-stok
-	// GET History stock by barang ID - /api/history-stok/:barang_id
+	// Stock routes
+	stokRepo := repositories.NewStokRepository(db)
+	stokHandler := handlers.NewStokHandler(stokRepo)
+
+	stokRoute := app.Group("/api/stok", middleware.Authentication())
+	stokHandler.RegisterStockRoute(stokRoute)
+
+	historyRoute := app.Group("/api/history-stok", middleware.Authentication())
+	stokHandler.RegisterHistoryRoute(historyRoute)
 
 	// 3. Implement: Transaksi - Pembelian routes (Guarded with JWT middleware)
 	// POST Create pembelian - /api/pembelian
