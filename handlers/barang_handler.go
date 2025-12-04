@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"warehouse-inventory-server/middleware"
 	"warehouse-inventory-server/models"
 	"warehouse-inventory-server/repositories"
 
@@ -21,9 +22,9 @@ func NewBarangHandler(repo *repositories.BarangRepository) *BarangHandler {
 func (h *BarangHandler) RegisterRoute(r fiber.Router) {
 	r.Get("/", h.GetBarang)
 	r.Get("/:id", h.GetBarangByID)
-	r.Post("/", h.CreateBarang)
-	r.Put("/:id", h.UpdateBarangByID)
-	r.Delete("/:id", h.DeleteBarangByID)
+	r.Post("/", h.CreateBarang, middleware.GuardAdmin())
+	r.Put("/:id", h.UpdateBarangByID, middleware.GuardAdmin())
+	r.Delete("/:id", h.DeleteBarangByID, middleware.GuardAdmin())
 }
 
 func (h *BarangHandler) GetBarang(c *fiber.Ctx) error {
