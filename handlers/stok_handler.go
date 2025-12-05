@@ -4,6 +4,7 @@ import (
 	"log"
 	"strconv"
 
+	"warehouse-inventory-server/models"
 	"warehouse-inventory-server/repositories"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,8 +39,25 @@ func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 			"status": "Server error",
 		})
 	}
+
+	var response []models.MstokResponse
+	for _, item := range data {
+		response = append(response, models.MstokResponse{
+			ID:        item.ID,
+			BarangID:  item.BarangID,
+			StokAkhir: item.StokAkhir,
+			UpdatedAt: item.UpdatedAt,
+			Barang: models.BarangStokResponse{
+				KodeBarang: item.MasterBarang.KodeBarang,
+				NamaBarang: item.MasterBarang.NamaBarang,
+				Satuan:     item.MasterBarang.Satuan,
+				HargaJual:  item.MasterBarang.HargaJual,
+			},
+		})
+	}
+
 	return c.Status(200).JSON(fiber.Map{
-		"data": data,
+		"data": response,
 	})
 }
 
@@ -48,7 +66,10 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
 	if err != nil {
-		return c.Status(200).Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
+		return c.Status(200).Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error":   "Data input tidak valid",
+			"message": "Parameter barang_id tidak valid",
+		})
 	}
 
 	stok, err := h.repo.GetOrCreateByBarangID(uint(barangID64))
@@ -59,8 +80,21 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 		})
 	}
 
+	response := models.MstokResponse{
+		ID:        stok.ID,
+		BarangID:  stok.BarangID,
+		StokAkhir: stok.StokAkhir,
+		UpdatedAt: stok.UpdatedAt,
+		Barang: models.BarangStokResponse{
+			KodeBarang: stok.MasterBarang.KodeBarang,
+			NamaBarang: stok.MasterBarang.NamaBarang,
+			Satuan:     stok.MasterBarang.Satuan,
+			HargaJual:  stok.MasterBarang.HargaJual,
+		},
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data": []any{stok},
+		"data": []models.MstokResponse{response},
 	})
 }
 
@@ -90,8 +124,31 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 		})
 	}
 
+	var response []models.HistoryStokResponse
+	for _, item := range data {
+		response = append(response, models.HistoryStokResponse{
+			ID:             item.ID,
+			BarangID:       item.BarangID,
+			UserID:         item.UserID,
+			JenisTransaksi: item.JenisTransaksi,
+			Jumlah:         item.Jumlah,
+			StokSebelumnya: item.StokSebelumnya,
+			StokSesudah:    item.StokSesudah,
+			Keterangan:     item.Keterangan,
+			CreatedAt:      item.CreatedAt,
+			Barang: models.BarangSimpleResponse{
+				KodeBarang: item.MasterBarang.KodeBarang,
+				NamaBarang: item.MasterBarang.NamaBarang,
+			},
+			User: models.UserSimpleResponse{
+				Username: item.Users.Username,
+				FullName: item.Users.FullName,
+			},
+		})
+	}
+
 	return c.Status(200).JSON(fiber.Map{
-		"data":  data,
+		"data":  response,
 		"total": total,
 	})
 }
@@ -100,8 +157,12 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
+
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid barang_id"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Data input tidak valid",
+			"message": "invalid barang_id",
+		})
 	}
 
 	pageStr := c.Query("page", "1")
@@ -125,8 +186,35 @@ func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 		})
 	}
 
+	var response []models.HistoryStokResponse
+	for _, item := range data {
+		response = append(response, models.HistoryStokResponse{
+			ID:             item.ID,
+			BarangID:       item.BarangID,
+			UserID:         item.UserID,
+			JenisTransaksi: item.JenisTransaksi,
+			Jumlah:         item.Jumlah,
+			StokSebelumnya: item.StokSebelumnya,
+			StokSesudah:    item.StokSesudah,
+			Keterangan:     item.Keterangan,
+			CreatedAt:      item.CreatedAt,
+			Barang: models.BarangSimpleResponse{
+				KodeBarang: item.MasterBarang.KodeBarang,
+				NamaBarang: item.MasterBarang.NamaBarang,
+			},
+			User: models.UserSimpleResponse{
+				Username: item.Users.Username,
+				FullName: item.Users.FullName,
+			},
+		})
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data":  data,
-		"total": total,
+		"data": response,
+		"meta": fiber.Map{
+			"page":  page,
+			"limit": limit,
+			"total": total,
+		},
 	})
 }

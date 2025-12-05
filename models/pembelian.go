@@ -47,3 +47,35 @@ type BeliHeaderRequest struct {
 	Supplier string              `json:"supplier"`
 	Details  []BeliDetailRequest `json:"details"`
 }
+
+// Response structs for pembelian API
+type BeliHeaderResponse struct {
+	ID        uint               `json:"id"`
+	NoFaktur  string             `json:"no_faktur"`
+	Supplier  string             `json:"supplier"`
+	Total     float64            `json:"total"`
+	UserID    uint               `json:"user_id"`
+	Status    string             `json:"status"`
+	CreatedAt time.Time          `json:"created_at"`
+	User      UserSimpleResponse `json:"user"`
+}
+
+type BeliDetailResponse struct {
+	ID       uint                    `json:"id"`
+	BarangID uint                    `json:"barang_id"`
+	Qty      int                     `json:"qty"`
+	Harga    float64                 `json:"harga"`
+	Subtotal float64                 `json:"subtotal"`
+	Barang   BarangPembelianResponse `json:"barang"`
+}
+
+type PembelianResponse struct {
+	Header  BeliHeaderResponse   `json:"header"`
+	Details []BeliDetailResponse `json:"details"`
+}
+
+type BarangPembelianResponse struct {
+	KodeBarang string `json:"kode_barang"`
+	NamaBarang string `json:"nama_barang"`
+	Satuan     string `json:"satuan"`
+}

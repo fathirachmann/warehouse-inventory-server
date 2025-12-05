@@ -9,7 +9,15 @@ import (
 )
 
 func InitDB() (*gorm.DB, error) {
-	dsn := os.Getenv("DB_DSN")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	pass := os.Getenv("DB_PASSWORD")
+	name := os.Getenv("DB_NAME")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		host, user, pass, name, port,
+	)
 	if dsn == "" {
 		return nil, fmt.Errorf("DB_DSN is not set")
 	}
