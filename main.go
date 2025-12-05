@@ -45,6 +45,20 @@ func main() {
 	}
 	log.Println("database connected")
 
+	// Run Migration if users table does not exist (First time setup)
+	if !db.Migrator().HasTable("users") {
+		log.Println("Running initial migration from database-dump.sql...")
+		sqlScript, err := os.ReadFile("db_migration.sql")
+		if err != nil {
+			log.Fatalf("failed to read migration file: %v", err)
+		}
+
+		if err := db.Exec(string(sqlScript)).Error; err != nil {
+			log.Fatalf("failed to execute migration script: %v", err)
+		}
+		log.Println("Initial migration completed.")
+	}
+
 	// Initialize Fiber app with Custom Error Handler
 	app := fiber.New(fiber.Config{
 		ErrorHandler: middleware.ErrorHandler,
