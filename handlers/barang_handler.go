@@ -196,18 +196,23 @@ func (h *BarangHandler) UpdateBarangByID(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusNotFound, "Barang tidak Ditemukan")
 	}
 
+	var req models.BarangRequest
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
+	}
+
 	errMap := make(map[string]string)
 
 	switch {
-	case barang.NamaBarang == "":
+	case req.NamaBarang == "":
 		errMap["nama_barang"] = "nama barang tidak boleh kosong"
-	case barang.Deskripsi == "":
+	case req.Deskripsi == "":
 		errMap["deskripsi"] = "deskripsi tidak boleh kosong"
-	case barang.Satuan == "":
+	case req.Satuan == "":
 		errMap["satuan"] = "satuan tidak boleh kosong"
-	case barang.HargaBeli <= 0:
+	case req.HargaBeli <= 0:
 		errMap["harga_beli"] = "harga beli harus lebih dari 0"
-	case barang.HargaJual <= 0:
+	case req.HargaJual <= 0:
 		errMap["harga_jual"] = "harga jual harus lebih dari 0"
 	}
 
@@ -216,11 +221,6 @@ func (h *BarangHandler) UpdateBarangByID(c *fiber.Ctx) error {
 			Message: "validation error",
 			Errors:  errMap,
 		}
-	}
-
-	var req models.BarangRequest
-	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
 	barang.NamaBarang = req.NamaBarang

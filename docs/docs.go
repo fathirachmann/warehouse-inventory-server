@@ -10,10 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "email": "support@warehouse.com"
-        },
+        "contact": {},
         "license": {
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -23,7 +20,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
+        "/api/auth/login": {
             "post": {
                 "description": "Authenticate user and return JWT token",
                 "consumes": [
@@ -51,42 +48,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.LoginResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.SpecificErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/auth/register": {
+        "/api/auth/register": {
             "post": {
                 "security": [
                     {
@@ -119,42 +111,38 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.RegisterResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.SpecificErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/barang": {
+        "/api/barang": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get a list of barang with pagination and search",
+                "description": "Mendapatkan daftar seluruh barang",
                 "consumes": [
                     "application/json"
                 ],
@@ -189,21 +177,238 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.BarangResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ValidationError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Membuat barang baru",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Create new barang",
+                "parameters": [
+                    {
+                        "description": "Barang Request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BarangRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.CreatedBarangResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.SpecificErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ValidationError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/history-stok": {
+        "/api/barang/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mendapatkan detail barang berdasarkan ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Get barang by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Barang ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BarangResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.SpecificErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Memperbarui detail barang berdasarkan ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Update barang by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Barang ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Barang Request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BarangRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BarangResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.SpecificErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.SpecificErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ValidationError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menghapus barang berdasarkan ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Barang"
+                ],
+                "summary": "Delete barang by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Barang ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.DeleteBarangResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/history-stok": {
             "get": {
                 "security": [
                     {
@@ -236,21 +441,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.HistoryStokResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/history-stok/{barang_id}": {
+        "/api/history-stok/{barang_id}": {
             "get": {
                 "security": [
                     {
@@ -290,28 +493,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.HistoryStokResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.SpecificErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/pembelian": {
+        "/api/pembelian": {
             "get": {
                 "security": [
                     {
@@ -330,15 +530,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.PembelianResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ValidationError"
                         }
                     }
                 }
@@ -381,28 +579,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ValidationError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ValidationError"
                         }
                     }
                 }
             }
         },
-        "/pembelian/{id}": {
+        "/api/pembelian/{id}": {
             "get": {
                 "security": [
                     {
@@ -450,7 +645,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/penjualan": {
+        "/api/penjualan": {
             "get": {
                 "security": [
                     {
@@ -469,15 +664,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.PenjualanResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
@@ -520,28 +713,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/penjualan/{id}": {
+        "/api/penjualan/{id}": {
             "get": {
                 "security": [
                     {
@@ -575,21 +765,19 @@ const docTemplate = `{
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/stok": {
+        "/api/stok": {
             "get": {
                 "security": [
                     {
@@ -608,21 +796,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.MstokResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/stok/{barang_id}": {
+        "/api/stok/{barang_id}": {
             "get": {
                 "security": [
                     {
@@ -650,22 +836,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.MstokResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/middleware.ErrorResponse"
                         }
                     }
                 }
@@ -673,6 +856,45 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "middleware.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "middleware.SpecificErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "middleware.ValidationError": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.BarangPembelianResponse": {
             "type": "object",
             "properties": {
@@ -690,6 +912,80 @@ const docTemplate = `{
         "models.BarangPenjualanResponse": {
             "type": "object",
             "properties": {
+                "kode_barang": {
+                    "type": "string"
+                },
+                "nama_barang": {
+                    "type": "string"
+                },
+                "satuan": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BarangRequest": {
+            "type": "object",
+            "properties": {
+                "deskripsi": {
+                    "type": "string"
+                },
+                "harga_beli": {
+                    "type": "number"
+                },
+                "harga_jual": {
+                    "type": "number"
+                },
+                "nama_barang": {
+                    "type": "string"
+                },
+                "satuan": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BarangResponse": {
+            "type": "object",
+            "properties": {
+                "deskripsi": {
+                    "type": "string"
+                },
+                "harga_beli": {
+                    "type": "number"
+                },
+                "harga_jual": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "kode_barang": {
+                    "type": "string"
+                },
+                "nama_barang": {
+                    "type": "string"
+                },
+                "satuan": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BarangSimpleResponse": {
+            "type": "object",
+            "properties": {
+                "kode_barang": {
+                    "type": "string"
+                },
+                "nama_barang": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BarangStokResponse": {
+            "type": "object",
+            "properties": {
+                "harga_jual": {
+                    "type": "number"
+                },
                 "kode_barang": {
                     "type": "string"
                 },
@@ -772,6 +1068,78 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "number"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.UserSimpleResponse"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.CreatedBarangResponse": {
+            "type": "object",
+            "properties": {
+                "deskripsi": {
+                    "type": "string"
+                },
+                "harga_beli": {
+                    "type": "number"
+                },
+                "harga_jual": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "kode_barang": {
+                    "type": "string"
+                },
+                "nama_barang": {
+                    "type": "string"
+                },
+                "satuan": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DeleteBarangResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.HistoryStokResponse": {
+            "type": "object",
+            "properties": {
+                "barang": {
+                    "$ref": "#/definitions/models.BarangSimpleResponse"
+                },
+                "barang_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "jenis_transaksi": {
+                    "type": "string"
+                },
+                "jumlah": {
+                    "type": "integer"
+                },
+                "keterangan": {
+                    "type": "string"
+                },
+                "stok_sebelum": {
+                    "type": "integer"
+                },
+                "stok_sesudah": {
+                    "type": "integer"
                 },
                 "user": {
                     "$ref": "#/definitions/models.UserSimpleResponse"
@@ -872,6 +1240,34 @@ const docTemplate = `{
                 }
             }
         },
+        "models.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MstokResponse": {
+            "type": "object",
+            "properties": {
+                "barang": {
+                    "$ref": "#/definitions/models.BarangStokResponse"
+                },
+                "barang_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "stok_akhir": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.PembelianResponse": {
             "type": "object",
             "properties": {
@@ -917,6 +1313,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UserSimpleResponse": {
             "type": "object",
             "properties": {
@@ -945,7 +1355,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Warehouse Inventory API",
-	Description:      "This is a backend service for a Warehouse Inventory System.",
+	Description:      "API Documentation for Warehouse Inventory Management System",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
