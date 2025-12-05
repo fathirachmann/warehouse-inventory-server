@@ -68,7 +68,7 @@ func (r *BarangRepository) List(search string, page, limit int) ([]models.Master
 		limit = 10
 	}
 	offset := (page - 1) * limit
-	if err := q.Order("nama_barang ASC").Limit(limit).Offset(offset).Find(&items).Error; err != nil {
+	if err := q.Order("kode_barang ASC").Limit(limit).Offset(offset).Find(&items).Error; err != nil {
 		return nil, 0, err
 	}
 	return items, total, nil
