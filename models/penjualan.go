@@ -49,3 +49,35 @@ type JualHeaderRequest struct {
 	Customer string              `json:"customer"`
 	Details  []JualDetailRequest `json:"details"`
 }
+
+// Response structs for penjualan API
+type JualHeaderResponse struct {
+	ID        uint               `json:"id"`
+	NoFaktur  string             `json:"no_faktur"`
+	Customer  string             `json:"customer"`
+	Total     float64            `json:"total"`
+	UserID    uint               `json:"user_id"`
+	Status    string             `json:"status"`
+	CreatedAt time.Time          `json:"created_at"`
+	User      UserSimpleResponse `json:"user"`
+}
+
+type JualDetailResponse struct {
+	ID       uint                    `json:"id"`
+	BarangID uint                    `json:"barang_id"`
+	Qty      int                     `json:"qty"`
+	Harga    float64                 `json:"harga"`
+	Subtotal float64                 `json:"subtotal"`
+	Barang   BarangPenjualanResponse `json:"barang"`
+}
+
+type PenjualanResponse struct {
+	Header  JualHeaderResponse   `json:"header"`
+	Details []JualDetailResponse `json:"details"`
+}
+
+type BarangPenjualanResponse struct {
+	KodeBarang string `json:"kode_barang"`
+	NamaBarang string `json:"nama_barang"`
+	Satuan     string `json:"satuan"`
+}

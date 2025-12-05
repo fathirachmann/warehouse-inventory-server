@@ -102,7 +102,8 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(created)
+	response := mapToPenjualanResponse(created)
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
 func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
@@ -113,8 +114,14 @@ func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 			"status": "Server error",
 		})
 	}
+
+	var response []models.PenjualanResponse
+	for _, p := range data {
+		response = append(response, mapToPenjualanResponse(&p))
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data": data,
+		"data": response,
 	})
 }
 
@@ -133,8 +140,40 @@ func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 			"status": "Server error",
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"header":  data,
-		"details": data.Details,
-	})
+
+	response := mapToPenjualanResponse(data)
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+// Private helper functions untuk mapping struct response
+func mapToPenjualanResponse(p *models.JualHeader) models.PenjualanResponse {
+	details := make([]models.JualDetailResponse, len(p.Details))
+	for i, d := range p.Details {
+		details[i] = models.JualDetailResponse{
+			ID:       d.ID,
+			BarangID: d.BarangID,
+			Barang: models.BarangPenjualanResponse{
+				KodeBarang: d.MasterBarang.KodeBarang,
+				NamaBarang: d.MasterBarang.NamaBarang,
+				Satuan:     d.MasterBarang.Satuan,
+			},
+			Qty:      d.Qty,
+			Harga:    d.Harga,
+			Subtotal: d.Subtotal,
+		}
+	}
+
+	return models.PenjualanResponse{
+		Header: models.JualHeaderResponse{
+			ID:        p.ID,
+			NoFaktur:  p.NoFaktur,
+			Customer:  p.Customer,
+			UserID:    p.UserID,
+			User:      models.UserSimpleResponse{Username: p.User.Username, FullName: p.User.FullName},
+			Total:     p.Total,
+			Status:    p.Status,
+			CreatedAt: p.CreatedAt,
+		},
+		Details: details,
+	}
 }

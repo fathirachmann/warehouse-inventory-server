@@ -111,7 +111,8 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(created)
+	response := mapToPembelianResponse(created)
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
 // GetAllPembelian adalah method untuk pengambilan semua data pembelian
@@ -123,8 +124,14 @@ func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 			"status": "Server error",
 		})
 	}
+
+	var response []models.PembelianResponse
+	for _, p := range data {
+		response = append(response, mapToPembelianResponse(&p))
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data": data,
+		"data": response,
 	})
 }
 
@@ -141,8 +148,38 @@ func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 			"status": "Server error",
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"header":  data,
-		"details": data.Details,
-	})
+
+	response := mapToPembelianResponse(data)
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+// Private helper functions untuk mapping struct response
+func mapToPembelianResponse(p *models.BeliHeader) models.PembelianResponse {
+	details := make([]models.BeliDetailResponse, len(p.Details))
+	for i, d := range p.Details {
+		details[i] = models.BeliDetailResponse{
+			ID:       d.ID,
+			BarangID: d.BarangID,
+			Barang: models.BarangPembelianResponse{
+				KodeBarang: d.MasterBarang.KodeBarang,
+				NamaBarang: d.MasterBarang.NamaBarang,
+				Satuan:     d.MasterBarang.Satuan,
+			},
+			Qty:      d.Qty,
+			Harga:    d.Harga,
+			Subtotal: d.Subtotal,
+		}
+	}
+
+	return models.PembelianResponse{
+		Header: models.BeliHeaderResponse{
+			ID:        p.ID,
+			NoFaktur:  p.NoFaktur,
+			UserID:    p.UserID,
+			User:      models.UserSimpleResponse{Username: p.User.Username, FullName: p.User.FullName},
+			Total:     p.Total,
+			CreatedAt: p.CreatedAt,
+		},
+		Details: details,
+	}
 }
