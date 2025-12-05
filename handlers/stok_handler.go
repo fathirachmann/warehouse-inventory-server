@@ -48,7 +48,10 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
 	if err != nil {
-		return c.Status(200).Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
+		return c.Status(200).Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error":   "Data input tidak valid",
+			"message": "Parameter barang_id tidak valid",
+		})
 	}
 
 	stok, err := h.repo.GetOrCreateByBarangID(uint(barangID64))
@@ -101,7 +104,10 @@ func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid barang_id"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Data input tidak valid",
+			"message": "invalid barang_id",
+		})
 	}
 
 	pageStr := c.Query("page", "1")

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"os"
 	"strings"
 
@@ -12,7 +13,9 @@ func Authentication() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing Authorization header"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error":   "Header Authorization error",
+				"message": "header Authorization tidak ditemukan"})
 		}
 
 		// Expect format: Bearer <token>
@@ -20,12 +23,17 @@ func Authentication() fiber.Handler {
 		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
 			tokenString = authHeader[7:]
 		} else {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid Authorization header format"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error":   "Header Authorization error",
+				"message": "format header Authorization salah",
+			})
 		}
 
 		secret := os.Getenv("JWT_SECRET")
+
 		if secret == "" {
-			secret = "dev-secret-change-me"
+			log.Println("Environment variable error: JWT_SECRET is empty", "middleware.go:Authentication", "Error at line 32")
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Server error"})
 		}
 
 		parsed, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -35,9 +43,10 @@ func Authentication() fiber.Handler {
 			return []byte(secret), nil
 		})
 		if err != nil || !parsed.Valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid or expired token"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "	"})
 		}
 
+		// Simpan claims ke fiber context
 		if claims, ok := parsed.Claims.(jwt.MapClaims); ok {
 			c.Locals("user", claims)
 		}
@@ -49,14 +58,42 @@ func Authentication() fiber.Handler {
 // GuardAdmin memastikan bahwa hanya user "admin" yang dapat mengakses route tertentu
 func GuardAdmin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		claims, ok := c.Locals("user").(jwt.MapClaims)
+		// Ambil claims dari context
+		userClaims, ok := c.Locals("user").(jwt.MapClaims)
 		if !ok {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error":   "JWT claims error",
+				"message": "claims user tidak ditemukan dalam context",
+			})
 		}
-		role, ok := claims["role"].(string)
-		if !ok || strings.ToLower(role) != "admin" {
-			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "akses ditolak: admin only"})
+
+		// Ambil role dari claims
+		roleVal, ok := userClaims["role"]
+		if !ok {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error":   "JWT claims error",
+				"message": "role tidak ditemukan dalam token",
+			})
 		}
+
+		// Validasi tipe data role
+		roleStr, ok := roleVal.(string)
+		if !ok {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error":   "JWT claims error",
+				"message": "format role dalam token tidak valid",
+			})
+		}
+
+		// Case validation: Cek apakah role adalah "admin"
+		if strings.ToLower(roleStr) != "admin" {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error":   "Akses ditolak",
+				"message": "Tidak memiliki izin - admin only",
+			})
+		}
+
+		// Lolos
 		return c.Next()
 	}
 }

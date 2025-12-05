@@ -30,41 +30,63 @@ func NewUserHandler(repo *repositories.UserRepository) *UserHandler {
 	return &UserHandler{repo: repo}
 }
 
-// Methods
+// Register adalah handler untuk mendaftarkan user baru - Admin only
 func (h *UserHandler) Register(c *fiber.Ctx) error {
 	var req *models.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
+		log.Println("Error parsing registration body:", err.Error(), "user_handler.go:Register", "Error at line 36")
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error": "Data input tidak valid",
+		})
 	}
 
 	// Register validations
-	switch {
-	case req.Username == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "username tidak boleh kosong"})
-	case req.Email == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email tidak boleh kosong"})
-	case req.Password == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "password tidak boleh kosong"})
+	errMap := make(map[string]string)
+
+	// Username validation
+	if req.Username == "" {
+		errMap["username"] = "username tidak boleh kosong"
+	} else if len(req.Username) < 4 {
+		errMap["username"] = "username minimal 4 karakter"
+	} else {
+		user, err := h.repo.FindByUsername(req.Username)
+		if err == nil && user != nil {
+			errMap["username"] = "Username sudah digunakan"
+		}
 	}
 
-	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
-	if !emailRegex.MatchString(req.Email) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Format email tidak valid"})
+	// FullName validation
+	if req.FullName == "" {
+		errMap["full_name"] = "full name tidak boleh kosong"
 	}
 
-	user, err := h.repo.FindByUsername(req.Username)
-	if err == nil && user != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Username sudah digunakan"})
+	// Email validation
+	if req.Email == "" {
+		errMap["email"] = "email tidak boleh kosong"
+	} else {
+		emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+		if !emailRegex.MatchString(req.Email) {
+			errMap["email"] = "Format email tidak valid"
+		} else {
+			user, err := h.repo.FindByEmail(req.Email)
+			if err == nil && user != nil {
+				errMap["email"] = "Email sudah digunakan"
+			}
+		}
 	}
 
-	user, err = h.repo.FindByEmail(req.Email)
-	if err == nil && user != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Email sudah digunakan"})
+	// Password validation
+	if req.Password == "" {
+		errMap["password"] = "password tidak boleh kosong"
+	} else if !utils.ValidatePassword(req.Password) {
+		errMap["password"] = "Password minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol"
 	}
 
-	// Password complexity validation
-	if !utils.ValidatePassword(req.Password) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Password harus minimal 8 karakter, mengandung huruf, angka, dan karakter spesial"})
+	if len(errMap) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "validation error",
+			"message": errMap,
+		})
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
@@ -85,7 +107,8 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := h.repo.Create(&userInput); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		log.Println("Error creating user during registration:", err.Error(), "user_handler.go:Register", "Error at line 109")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "database error"})
 	}
 
 	registerResponse := models.RegisterResponse{
@@ -100,32 +123,51 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
+// Login adalah handler untuk login user dan mendapatkan JWT token
 func (h *UserHandler) Login(c *fiber.Ctx) error {
 	var req *models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
+		log.Println("Error parsing login body:", err.Error(), "user_handler.go:Login", "Error at line 127")
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
 	}
 
 	// Login validations
-	switch {
-	case req.Email == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email tidak boleh kosong"})
-	case req.Password == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "password tidak boleh kosong"})
+	errMap := make(map[string]string)
+
+	if req.Email == "" {
+		errMap["email"] = "email tidak boleh kosong"
+	} else {
+		emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+		if !emailRegex.MatchString(req.Email) {
+			errMap["email"] = "Format email tidak valid"
+		}
 	}
 
-	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
-	if !emailRegex.MatchString(req.Email) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Format email tidak valid"})
+	if req.Password == "" {
+		errMap["password"] = "password tidak boleh kosong"
 	}
 
+	if len(errMap) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "validation error",
+			"message": errMap,
+		})
+	}
+
+	// Authenticate user
 	user, err := h.repo.FindByEmail(req.Email)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Email atau password salah"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error":   "validation error",
+			"message": "Email atau password salah",
+		})
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Email atau password salah"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error":   "validation error",
+			"message": "Email atau password salah",
+		})
 	}
 
 	// JWT generation

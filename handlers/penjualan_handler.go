@@ -32,19 +32,24 @@ func (h *PenjualanHandler) RegisterRoute(r fiber.Router) {
 func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	var req models.JualHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error":   "Data input tidak valid",
+			"message": "body parsing error",
+		})
 	}
+
+	errMap := make(map[string][]string)
 
 	switch {
 	case req.Customer == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "customer tidak boleh kosong"})
+		errMap["customer"] = append(errMap["customer"], "Nama customer tidak boleh kosong")
 	case len(req.Details) == 0:
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "details tidak boleh kosong"})
+		errMap["details"] = append(errMap["details"], "details tidak boleh kosong")
 	}
 
 	var userID uint
 	if claims, ok := c.Locals("user").(jwt.MapClaims); ok {
-		if sub, ok := claims["od"]; ok {
+		if sub, ok := claims["id"]; ok {
 			switch v := sub.(type) {
 			case float64:
 				userID = uint(v)
@@ -65,7 +70,10 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	total := 0.0
 	for _, d := range req.Details {
 		if d.Qty <= 0 || d.Harga <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "qty and harga must be positive"})
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error":   "validation error",
+				"message": "qty and harga harus lebih dari 0",
+			})
 		}
 		subtotal := float64(d.Qty) * d.Harga
 		total += subtotal
@@ -113,7 +121,10 @@ func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error":   "Data input tidak valid",
+			"message": "parameter ID tidak valid",
+		})
 	}
 	data, err := h.repo.GetPenjualanByID(uint(id))
 	if err != nil {

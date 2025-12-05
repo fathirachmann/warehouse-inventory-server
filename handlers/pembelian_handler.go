@@ -34,14 +34,26 @@ func (h *PembelianHandler) RegisterRoute(r fiber.Router) {
 func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	var req models.BeliHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error":   "body parsing error",
+			"message": "Data input tidak valid",
+		})
 	}
+
+	errMap := make(map[string][]string)
 
 	switch {
 	case req.Supplier == "":
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "supplier tidak boleh kosong"})
+		errMap["supplier"] = append(errMap["supplier"], "Nama supplier tidak boleh kosong")
 	case len(req.Details) == 0:
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "details tidak boleh kosong"})
+		errMap["details"] = append(errMap["details"], "details tidak boleh kosong")
+	}
+
+	if len(errMap) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"errors":  "validation error",
+			"message": errMap,
+		})
 	}
 
 	var userID uint
@@ -67,7 +79,10 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	total := 0.0
 	for _, d := range req.Details {
 		if d.Qty <= 0 || d.Harga <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "qty dan harga tidak boleh kurang dari sama dengan 0"})
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error":   "validation error",
+				"message": "qty dan harga tidak boleh kurang dari sama dengan 0",
+			})
 		}
 		subtotal := float64(d.Qty) * d.Harga
 		total += subtotal
@@ -117,7 +132,7 @@ func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": "Data input tidak valid"})
 	}
 	data, err := h.repo.GetPembelianByID(uint(id))
 	if err != nil {
