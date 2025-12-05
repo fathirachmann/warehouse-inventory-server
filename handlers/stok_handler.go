@@ -39,8 +39,25 @@ func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 			"status": "Server error",
 		})
 	}
+
+	var response []models.MstokResponse
+	for _, item := range data {
+		response = append(response, models.MstokResponse{
+			ID:        item.ID,
+			BarangID:  item.BarangID,
+			StokAkhir: item.StokAkhir,
+			UpdatedAt: item.UpdatedAt,
+			Barang: models.BarangStokResponse{
+				KodeBarang: item.MasterBarang.KodeBarang,
+				NamaBarang: item.MasterBarang.NamaBarang,
+				Satuan:     item.MasterBarang.Satuan,
+				HargaJual:  item.MasterBarang.HargaJual,
+			},
+		})
+	}
+
 	return c.Status(200).JSON(fiber.Map{
-		"data": data,
+		"data": response,
 	})
 }
 
@@ -63,8 +80,21 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 		})
 	}
 
+	response := models.MstokResponse{
+		ID:        stok.ID,
+		BarangID:  stok.BarangID,
+		StokAkhir: stok.StokAkhir,
+		UpdatedAt: stok.UpdatedAt,
+		Barang: models.BarangStokResponse{
+			KodeBarang: stok.MasterBarang.KodeBarang,
+			NamaBarang: stok.MasterBarang.NamaBarang,
+			Satuan:     stok.MasterBarang.Satuan,
+			HargaJual:  stok.MasterBarang.HargaJual,
+		},
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data": []any{stok},
+		"data": []models.MstokResponse{response},
 	})
 }
 
