@@ -46,7 +46,7 @@ func NewUserHandler(repo *repositories.UserRepository) *UserHandler {
 func (h *UserHandler) Register(c *fiber.Ctx) error {
 	var req *models.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
-		log.Println("Error parsing registration body:", err.Error(), "user_handler.go:Register", "Error at line 36")
+		log.Println("Error parsing registration body:", err.Error(), "user_handler.go:Register", "Error at line 48")
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
@@ -101,7 +101,7 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 	if err != nil {
-		log.Println("Error hashing password during registration:", err.Error(), "user_handler.go:Register", "Error at line 72")
+		log.Println("Error hashing password during registration:", err.Error(), "user_handler.go:Register", "Error at line 102")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
@@ -115,7 +115,7 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := h.repo.Create(&userInput); err != nil {
-		log.Println("Error creating user during registration:", err.Error(), "user_handler.go:Register", "Error at line 109")
+		log.Println("Error creating user during registration:", err.Error(), "user_handler.go:Register", "Error at line 117")
 		return fiber.NewError(fiber.StatusBadRequest, "database error")
 	}
 
@@ -147,7 +147,7 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 func (h *UserHandler) Login(c *fiber.Ctx) error {
 	var req *models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
-		log.Println("Error parsing login body:", err.Error(), "user_handler.go:Login", "Error at line 127")
+		log.Println("Error parsing login body:", err.Error(), "user_handler.go:Login", "Error at line 149")
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
@@ -195,10 +195,10 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(secret))
 
+	signedToken, err := token.SignedString([]byte(secret))
 	if err != nil {
-		log.Println("Error signing JWT token during login:", err.Error(), "user_handler.go:Login", "Error at line 144")
+		log.Println("Error signing JWT token during login:", err.Error(), "user_handler.go:Login", "Error at line 190")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 

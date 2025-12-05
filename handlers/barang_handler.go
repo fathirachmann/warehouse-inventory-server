@@ -47,7 +47,7 @@ func (h *BarangHandler) GetBarang(c *fiber.Ctx) error {
 	limit, _ := strconv.Atoi(c.Query("limit"))
 	items, total, err := h.repo.List(search, page, limit)
 	if err != nil {
-		log.Println("Error fetching barang list:", err.Error(), "barang_handler.go:GetBarang", "Error at line 36")
+		log.Println("Error fetching barang list:", err.Error(), "barang_handler.go:GetBarang", "Error at line 48")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
@@ -156,7 +156,7 @@ func (h *BarangHandler) CreateBarang(c *fiber.Ctx) error {
 	}
 
 	if err := h.repo.Create(&barang); err != nil {
-		log.Println("Error creating barang:", err.Error(), "barang_handler.go:CreateBarang", "Error at line 89")
+		log.Println("Error creating barang:", err.Error(), "barang_handler.go:CreateBarang", "Error at line 158")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
