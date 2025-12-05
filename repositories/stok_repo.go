@@ -20,7 +20,7 @@ func NewStokRepository(db *gorm.DB) *StokRepository {
 func (r *StokRepository) GetOrCreateByBarangID(barangID uint) (*models.Mstok, error) {
 	var stok models.Mstok
 
-	err := r.db.Where("barang_id = ?", barangID).First(&stok).Error
+	err := r.db.Preload("MasterBarang").Where("barang_id = ?", barangID).First(&stok).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		stok = models.Mstok{
 			BarangID:  barangID,
@@ -28,6 +28,11 @@ func (r *StokRepository) GetOrCreateByBarangID(barangID uint) (*models.Mstok, er
 		}
 		if errCreate := r.db.Create(&stok).Error; errCreate != nil {
 			return nil, errCreate
+		}
+		// Load relation for the newly created record
+		if errLoad := r.db.Preload("MasterBarang").First(&stok, stok.ID).Error; errLoad != nil {
+			// If loading fails, just return the stok without relation (or handle error)
+			// For now, we can ignore or log, but returning is fine.
 		}
 		return &stok, nil
 	}

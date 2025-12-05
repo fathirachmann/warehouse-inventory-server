@@ -18,3 +18,7 @@ type HistoryStok struct {
 	MasterBarang MasterBarang `gorm:"foreignKey:BarangID;references:ID" json:"master_barang"` // HistoryStok many to one MasterBarang
 	Users        User         `gorm:"foreignKey:UserID;references:ID" json:"user"`            // HistoryStok many to one User
 }
+
+func (HistoryStok) TableName() string {
+	return "history_stok"
+}

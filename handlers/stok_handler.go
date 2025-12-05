@@ -103,6 +103,7 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
+
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Data input tidak valid",

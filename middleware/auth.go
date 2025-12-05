@@ -25,7 +25,7 @@ func Authentication() fiber.Handler {
 		} else {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error":   "Header Authorization error",
-				"message": "format header Authorization salah",
+				"message": "Token tidak valid atau hilang",
 			})
 		}
 
