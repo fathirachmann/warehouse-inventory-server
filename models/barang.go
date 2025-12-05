@@ -17,3 +17,36 @@ type MasterBarang struct {
 func (MasterBarang) TableName() string {
 	return "master_barang"
 }
+
+// Request and Response structs for barang API
+type BarangRequest struct {
+	NamaBarang string  `json:"nama_barang"`
+	Deskripsi  string  `json:"deskripsi"`
+	Satuan     string  `json:"satuan"`
+	HargaBeli  float64 `json:"harga_beli"`
+	HargaJual  float64 `json:"harga_jual"`
+}
+
+type CreatedBarangResponse struct {
+	ID         uint    `json:"id"`
+	KodeBarang string  `json:"kode_barang"`
+	NamaBarang string  `json:"nama_barang"`
+	Deskripsi  string  `json:"deskripsi"`
+	Satuan     string  `json:"satuan"`
+	HargaBeli  float64 `json:"harga_beli"`
+	HargaJual  float64 `json:"harga_jual"`
+}
+
+type BarangResponse struct {
+	ID         uint    `json:"id"`
+	KodeBarang string  `json:"kode_barang"`
+	NamaBarang string  `json:"nama_barang"`
+	Deskripsi  string  `json:"deskripsi"`
+	Satuan     string  `json:"satuan"`
+	HargaBeli  float64 `json:"harga_beli"`
+	HargaJual  float64 `json:"harga_jual"`
+}
+
+type DeleteBarangResponse struct {
+	Message string `json:"message"`
+}

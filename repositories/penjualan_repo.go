@@ -86,7 +86,7 @@ func (r *PenjualanRepository) CreatePenjualan(header *models.JualHeader, details
 			UserID:         header.UserID,
 			JenisTransaksi: "keluar",
 			Jumlah:         details[i].Qty,
-			StokSebelumnya: stokSebelum,
+			StokSebelum:    stokSebelum,
 			StokSesudah:    stokSesudah,
 			Keterangan:     "Penjualan " + header.NoFaktur,
 		}

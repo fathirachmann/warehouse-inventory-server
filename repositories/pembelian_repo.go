@@ -59,7 +59,7 @@ func (r *PembelianRepository) CreatePembelian(header *models.BeliHeader, details
 			UserID:         header.UserID,
 			JenisTransaksi: "masuk",
 			Jumlah:         details[i].Qty,
-			StokSebelumnya: stokSebelum,
+			StokSebelum:    stokSebelum,
 			StokSesudah:    stokSesudah,
 			Keterangan:     "Pembelian " + header.NoFaktur,
 		}

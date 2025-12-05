@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"warehouse-inventory-server/middleware"
 	"warehouse-inventory-server/models"
 	"warehouse-inventory-server/repositories"
 
@@ -30,30 +31,39 @@ func (h *PembelianHandler) RegisterRoute(r fiber.Router) {
 	r.Get("/:id", h.GetPembelianByID)
 }
 
-// CreatePembelian handle pembuatan pembelian baru beserta update stok dan history
+// CreatePembelian godoc
+// @Summary Create new purchase
+// @Description Create a new purchase transaction
+// @Tags Pembelian
+// @Accept json
+// @Produce json
+// @Param body body models.BeliHeaderRequest true "Purchase Request"
+// @Success 201 {object} models.PembelianResponse "Created"
+// @Failure 400 {object} middleware.ValidationError "Bad Request"
+// @Failure 422 {object} middleware.ValidationError "Unprocessable Entity"
+// @Failure 500 {object} middleware.ValidationError "Internal Server Error"
+// @Security BearerAuth
+// @Router /api/pembelian [post]
 func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	var req models.BeliHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error":   "body parsing error",
-			"message": "Data input tidak valid",
-		})
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
-	errMap := make(map[string][]string)
+	errMap := make(map[string]string)
 
 	switch {
 	case req.Supplier == "":
-		errMap["supplier"] = append(errMap["supplier"], "Nama supplier tidak boleh kosong")
+		errMap["supplier"] = "Nama supplier tidak boleh kosong"
 	case len(req.Details) == 0:
-		errMap["details"] = append(errMap["details"], "details tidak boleh kosong")
+		errMap["details"] = "details tidak boleh kosong"
 	}
 
 	if len(errMap) > 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"errors":  "validation error",
-			"message": errMap,
-		})
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors:  errMap,
+		}
 	}
 
 	var userID uint
@@ -79,10 +89,7 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	total := 0.0
 	for _, d := range req.Details {
 		if d.Qty <= 0 || d.Harga <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error":   "validation error",
-				"message": "qty dan harga tidak boleh kurang dari sama dengan 0",
-			})
+			return fiber.NewError(fiber.StatusBadRequest, "qty dan harga tidak boleh kurang dari sama dengan 0")
 		}
 		subtotal := float64(d.Qty) * d.Harga
 		total += subtotal
@@ -97,32 +104,34 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	header.Total = total
 
 	if err := h.repo.CreatePembelian(&header, details); err != nil {
-		log.Println("Error CreatePembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 84")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		log.Println("Error CreatePembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 107")
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	created, err := h.repo.GetPembelianByID(header.ID)
 	if err != nil {
-		log.Println("Error fetching created pembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 91")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		log.Println("Error fetching created pembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 113")
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	response := mapToPembelianResponse(created)
 	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
-// GetAllPembelian adalah method untuk pengambilan semua data pembelian
+// GetAllPembelian godoc
+// @Summary Get all purchases
+// @Description Get a list of all purchase transactions
+// @Tags Pembelian
+// @Produce json
+// @Success 200 {object} models.PembelianResponse "OK"
+// @Failure 500 {object} middleware.ValidationError "Internal Server Error"
+// @Security BearerAuth
+// @Router /api/pembelian [get]
 func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPembelian()
 	if err != nil {
 		log.Println("Error fetching all pembelian:", err.Error(), "pembelian_handler.go:GetAllPembelian", "Error at line 104")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	var response []models.PembelianResponse
@@ -135,18 +144,26 @@ func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 	})
 }
 
-// GetPembelianByID adalah method untuk pengambilan data pembelian berdasarkan ID
+// GetPembelianByID godoc
+// @Summary Get purchase by ID
+// @Description Get details of a specific purchase transaction
+// @Tags Pembelian
+// @Produce json
+// @Param id path int true "Purchase ID"
+// @Success 200 {object} models.PembelianResponse
+// @Failure 422 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /api/pembelian/{id} [get]
 func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": "Data input tidak valid"})
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 	data, err := h.repo.GetPembelianByID(uint(id))
 	if err != nil {
 		log.Println("Error fetching pembelian by ID:", err.Error(), "pembelian_handler.go:GetPembelianByID", "Error at line 122")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	response := mapToPembelianResponse(data)

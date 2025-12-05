@@ -9,7 +9,7 @@ type HistoryStok struct {
 	UserID         uint      `gorm:"not null" json:"user_id"`
 	JenisTransaksi string    `gorm:"not null" json:"jenis_transaksi"` // "masuk" or "keluar"
 	Jumlah         int       `gorm:"not null" json:"jumlah"`
-	StokSebelumnya int       `gorm:"not null" json:"stok_sebelumnya"`
+	StokSebelum    int       `gorm:"not null" json:"stok_sebelum"`
 	StokSesudah    int       `gorm:"not null" json:"stok_sesudah"`
 	Keterangan     string    `json:"keterangan"`
 	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
@@ -31,7 +31,7 @@ type HistoryStokResponse struct {
 	UserID         uint                 `json:"user_id"`
 	JenisTransaksi string               `json:"jenis_transaksi"`
 	Jumlah         int                  `json:"jumlah"`
-	StokSebelumnya int                  `json:"stok_sebelum"`
+	StokSebelum    int                  `json:"stok_sebelum"`
 	StokSesudah    int                  `json:"stok_sesudah"`
 	Keterangan     string               `json:"keterangan"`
 	CreatedAt      time.Time            `json:"created_at"`

@@ -30,14 +30,24 @@ func NewUserHandler(repo *repositories.UserRepository) *UserHandler {
 	return &UserHandler{repo: repo}
 }
 
-// Register adalah handler untuk mendaftarkan user baru - Admin only
+// Register godoc
+// @Summary Register new user (Admin only)
+// @Description Register a new staff user. Only admin can perform this action.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body models.RegisterRequest true "Register Request"
+// @Success 201 {object} models.RegisterResponse "Created"
+// @Failure 400 {object} middleware.SpecificErrorResponse "Bad Request"
+// @Failure 422 {object} middleware.ErrorResponse "Unprocessable Entity"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
+// @Security BearerAuth
+// @Router /api/auth/register [post]
 func (h *UserHandler) Register(c *fiber.Ctx) error {
 	var req *models.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
 		log.Println("Error parsing registration body:", err.Error(), "user_handler.go:Register", "Error at line 36")
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error": "Data input tidak valid",
-		})
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
 	// Register validations
@@ -83,18 +93,16 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if len(errMap) > 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "validation error",
-			"message": errMap,
-		})
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors:  errMap,
+		}
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 	if err != nil {
 		log.Println("Error hashing password during registration:", err.Error(), "user_handler.go:Register", "Error at line 72")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	// Create user
@@ -108,7 +116,7 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 
 	if err := h.repo.Create(&userInput); err != nil {
 		log.Println("Error creating user during registration:", err.Error(), "user_handler.go:Register", "Error at line 109")
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "database error"})
+		return fiber.NewError(fiber.StatusBadRequest, "database error")
 	}
 
 	registerResponse := models.RegisterResponse{
@@ -123,12 +131,24 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-// Login adalah handler untuk login user dan mendapatkan JWT token
+// Login godoc
+// @Summary Login user
+// @Description Authenticate user and return JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body models.LoginRequest true "Login Request"
+// @Success 200 {object} models.LoginResponse "OK"
+// @Failure 400 {object} middleware.SpecificErrorResponse "Bad Request"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 422 {object} middleware.ErrorResponse "Unprocessable Entity"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
+// @Router /api/auth/login [post]
 func (h *UserHandler) Login(c *fiber.Ctx) error {
 	var req *models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
 		log.Println("Error parsing login body:", err.Error(), "user_handler.go:Login", "Error at line 127")
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Data input tidak valid"})
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
 	// Login validations
@@ -148,26 +168,20 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	}
 
 	if len(errMap) > 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "validation error",
-			"message": errMap,
-		})
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors:  errMap,
+		}
 	}
 
 	// Authenticate user
 	user, err := h.repo.FindByEmail(req.Email)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   "validation error",
-			"message": "Email atau password salah",
-		})
+		return fiber.NewError(fiber.StatusUnauthorized, "Email atau password salah")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error":   "validation error",
-			"message": "Email atau password salah",
-		})
+		return fiber.NewError(fiber.StatusUnauthorized, "Email atau password salah")
 	}
 
 	// JWT generation
@@ -185,12 +199,12 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 
 	if err != nil {
 		log.Println("Error signing JWT token during login:", err.Error(), "user_handler.go:Login", "Error at line 144")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"token": signedToken, // Token sudah termasuk data claims user
-	})
+	loginResponse := models.LoginResponse{
+		Token: signedToken,
+	}
+
+	return c.Status(fiber.StatusOK).JSON(loginResponse)
 }
