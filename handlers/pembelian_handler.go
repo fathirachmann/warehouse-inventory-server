@@ -31,7 +31,19 @@ func (h *PembelianHandler) RegisterRoute(r fiber.Router) {
 	r.Get("/:id", h.GetPembelianByID)
 }
 
-// CreatePembelian handle pembuatan pembelian baru beserta update stok dan history
+// CreatePembelian godoc
+// @Summary Create new purchase
+// @Description Create a new purchase transaction
+// @Tags Pembelian
+// @Accept json
+// @Produce json
+// @Param body body models.BeliHeaderRequest true "Purchase Request"
+// @Success 201 {object} models.PembelianResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 422 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /pembelian [post]
 func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	var req models.BeliHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -106,7 +118,15 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
-// GetAllPembelian adalah method untuk pengambilan semua data pembelian
+// GetAllPembelian godoc
+// @Summary Get all purchases
+// @Description Get a list of all purchase transactions
+// @Tags Pembelian
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /pembelian [get]
 func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPembelian()
 	if err != nil {
@@ -124,7 +144,17 @@ func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 	})
 }
 
-// GetPembelianByID adalah method untuk pengambilan data pembelian berdasarkan ID
+// GetPembelianByID godoc
+// @Summary Get purchase by ID
+// @Description Get details of a specific purchase transaction
+// @Tags Pembelian
+// @Produce json
+// @Param id path int true "Purchase ID"
+// @Success 200 {object} models.PembelianResponse
+// @Failure 422 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /pembelian/{id} [get]
 func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {

@@ -30,7 +30,19 @@ func NewUserHandler(repo *repositories.UserRepository) *UserHandler {
 	return &UserHandler{repo: repo}
 }
 
-// Register adalah handler untuk mendaftarkan user baru - Admin only
+// Register godoc
+// @Summary Register new user (Admin only)
+// @Description Register a new staff user. Only admin can perform this action.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body models.RegisterRequest true "Register Request"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 422 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /auth/register [post]
 func (h *UserHandler) Register(c *fiber.Ctx) error {
 	var req *models.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -119,7 +131,19 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-// Login adalah handler untuk login user dan mendapatkan JWT token
+// Login godoc
+// @Summary Login user
+// @Description Authenticate user and return JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body models.LoginRequest true "Login Request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 422 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /auth/login [post]
 func (h *UserHandler) Login(c *fiber.Ctx) error {
 	var req *models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {

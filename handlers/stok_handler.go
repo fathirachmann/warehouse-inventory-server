@@ -30,7 +30,15 @@ func (h *StokHandler) RegisterHistoryRoute(r fiber.Router) {
 	r.Get("/:barang_id", h.GetHistoryByBarangID)
 }
 
-// GetAllStok adalah handler untuk mendapatkan semua data stok
+// GetAllStok godoc
+// @Summary Get all stock
+// @Description Get a list of all stock items
+// @Tags Stok
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /stok [get]
 func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllStok()
 	if err != nil {
@@ -59,7 +67,17 @@ func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 	})
 }
 
-// GetStokByBarangID adalah handler untuk mendapatkan data stok berdasarkan barang_id
+// GetStokByBarangID godoc
+// @Summary Get stock by barang ID
+// @Description Get stock details for a specific barang
+// @Tags Stok
+// @Produce json
+// @Param barang_id path int true "Barang ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 422 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /stok/{barang_id} [get]
 func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
@@ -91,7 +109,17 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 	})
 }
 
-// GetHistoryAll adalah handler untuk mendapatkan semua data history stok dengan pagination
+// GetHistoryAll godoc
+// @Summary Get all stock history
+// @Description Get a list of stock history with pagination
+// @Tags History Stok
+// @Produce json
+// @Param page query int false "Page number"
+// @Param limit query int false "Items per page"
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /history-stok [get]
 func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 
 	// Note: Pagination tidak ada di requirement. Namun, untuk frontend agar tidak load data terlalu banyak.
@@ -144,7 +172,19 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 	})
 }
 
-// GetHistoryByBarangID adalah handler untuk mendapatkan data history stok berdasarkan barang_id dengan pagination
+// GetHistoryByBarangID godoc
+// @Summary Get stock history by barang ID
+// @Description Get stock history for a specific barang with pagination
+// @Tags History Stok
+// @Produce json
+// @Param barang_id path int true "Barang ID"
+// @Param page query int false "Page number"
+// @Param limit query int false "Items per page"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /history-stok/{barang_id} [get]
 func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
