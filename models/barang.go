@@ -45,6 +45,12 @@ type BarangResponse struct {
 	Satuan     string  `json:"satuan"`
 	HargaBeli  float64 `json:"harga_beli"`
 	HargaJual  float64 `json:"harga_jual"`
+	Stok       int     `json:"stok"`
+}
+
+type BarangWithStock struct {
+	MasterBarang
+	StokAkhir int `json:"stok_akhir"`
 }
 
 type DeleteBarangResponse struct {

@@ -387,6 +387,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.DeleteBarangResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request (Stock \u003e 0)",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -966,6 +972,9 @@ const docTemplate = `{
                 },
                 "satuan": {
                     "type": "string"
+                },
+                "stok": {
+                    "type": "integer"
                 }
             }
         },

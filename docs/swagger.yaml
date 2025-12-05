@@ -72,6 +72,8 @@ definitions:
         type: string
       satuan:
         type: string
+      stok:
+        type: integer
     type: object
   models.BarangSimpleResponse:
     properties:
@@ -484,6 +486,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.DeleteBarangResponse'
+        "400":
+          description: Bad Request (Stock > 0)
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
         "404":
           description: Not Found
           schema:

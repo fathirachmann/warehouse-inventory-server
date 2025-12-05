@@ -61,6 +61,7 @@ func (h *BarangHandler) GetBarang(c *fiber.Ctx) error {
 			Satuan:     item.Satuan,
 			HargaBeli:  item.HargaBeli,
 			HargaJual:  item.HargaJual,
+			Stok:       item.StokAkhir,
 		})
 	}
 
@@ -86,7 +87,7 @@ func (h *BarangHandler) GetBarangByID(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid id")
 	}
-	barang, err := h.repo.GetByID(uint(id64))
+	barang, err := h.repo.GetDetailByID(uint(id64))
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, "Barang tidak Ditemukan")
 	}
@@ -99,6 +100,7 @@ func (h *BarangHandler) GetBarangByID(c *fiber.Ctx) error {
 		Satuan:     barang.Satuan,
 		HargaBeli:  barang.HargaBeli,
 		HargaJual:  barang.HargaJual,
+		Stok:       barang.StokAkhir,
 	}
 
 	return c.Status(200).JSON(response)
@@ -254,6 +256,7 @@ func (h *BarangHandler) UpdateBarangByID(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "Barang ID"
 // @Success 200 {object} models.DeleteBarangResponse "OK"
+// @Failure 400 {object} middleware.ErrorResponse "Bad Request (Stock > 0)"
 // @Failure 422 {object} middleware.ErrorResponse "Unprocessable Entity"
 // @Failure 404 {object} middleware.ErrorResponse "Not Found"
 // @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
@@ -265,7 +268,14 @@ func (h *BarangHandler) DeleteBarangByID(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "Parameter ID tidak valid")
 	}
 	if err := h.repo.Delete(uint(id64)); err != nil {
-		return fiber.NewError(fiber.StatusNotFound, "Barang tidak ditemukan")
+		if err.Error() == "barang tidak ditemukan" {
+			return fiber.NewError(fiber.StatusNotFound, "Barang tidak ditemukan")
+		}
+		// Check if error message starts with "barang masih memiliki stok"
+		if len(err.Error()) >= 26 && err.Error()[:26] == "barang masih memiliki stok" {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	message := fmt.Sprintf("Barang dengan ID %d berhasil dihapus", id64)
