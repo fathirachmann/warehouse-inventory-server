@@ -130,8 +130,6 @@ func (h *BarangHandler) CreateBarang(c *fiber.Ctx) error {
 	switch {
 	case req.NamaBarang == "":
 		errMap["nama_barang"] = "nama barang tidak boleh kosong"
-	case req.Deskripsi == "":
-		errMap["deskripsi"] = "deskripsi tidak boleh kosong"
 	case req.Satuan == "":
 		errMap["satuan"] = "satuan tidak boleh kosong"
 	case req.HargaBeli <= 0:
@@ -208,14 +206,12 @@ func (h *BarangHandler) UpdateBarangByID(c *fiber.Ctx) error {
 	switch {
 	case req.NamaBarang == "":
 		errMap["nama_barang"] = "nama barang tidak boleh kosong"
-	case req.Deskripsi == "":
-		errMap["deskripsi"] = "deskripsi tidak boleh kosong"
 	case req.Satuan == "":
 		errMap["satuan"] = "satuan tidak boleh kosong"
-	case req.HargaBeli <= 0:
-		errMap["harga_beli"] = "harga beli harus lebih dari 0"
-	case req.HargaJual <= 0:
-		errMap["harga_jual"] = "harga jual harus lebih dari 0"
+	case req.HargaBeli < 0:
+		errMap["harga_beli"] = "harga beli tidak boleh kurang dari 0"
+	case req.HargaJual < 0:
+		errMap["harga_jual"] = "harga jual tidak boleh kurang dari 0"
 	}
 
 	if len(errMap) > 0 {
