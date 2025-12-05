@@ -7,7 +7,7 @@ type HistoryStok struct {
 	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	BarangID       uint      `gorm:"not null" json:"barang_id"`
 	UserID         uint      `gorm:"not null" json:"user_id"`
-	JenisTransaksi string    `gorm:"not null" json:"jenis_transaksi"` // "masuk" or "keluar"
+	JenisTransaksi string    `gorm:"not null" json:"jenis_transaksi"` // "masuk", "keluar" or "adjustment"
 	Jumlah         int       `gorm:"not null" json:"jumlah"`
 	StokSebelum    int       `gorm:"not null" json:"stok_sebelum"`
 	StokSesudah    int       `gorm:"not null" json:"stok_sesudah"`
