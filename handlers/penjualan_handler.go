@@ -37,12 +37,12 @@ func (h *PenjualanHandler) RegisterRoute(r fiber.Router) {
 // @Accept json
 // @Produce json
 // @Param body body models.JualHeaderRequest true "Sale Request"
-// @Success 201 {object} models.PenjualanResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 422 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 201 {object} models.PenjualanResponse "Created"
+// @Failure 400 {object} middleware.ErrorResponse "Bad Request"
+// @Failure 422 {object} middleware.ErrorResponse "Unprocessable Entity"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
 // @Security BearerAuth
-// @Router /penjualan [post]
+// @Router /api/penjualan [post]
 func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	var req models.JualHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -122,10 +122,10 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 // @Description Get a list of all sale transactions
 // @Tags Penjualan
 // @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} models.PenjualanResponse "OK"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
 // @Security BearerAuth
-// @Router /penjualan [get]
+// @Router /api/penjualan [get]
 func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPenjualan()
 	if err != nil {
@@ -149,11 +149,11 @@ func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 // @Tags Penjualan
 // @Produce json
 // @Param id path int true "Sale ID"
-// @Success 200 {object} models.PenjualanResponse
-// @Failure 422 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} models.PenjualanResponse "OK"
+// @Failure 422 {object} middleware.ErrorResponse "Unprocessable Entity"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
 // @Security BearerAuth
-// @Router /penjualan/{id} [get]
+// @Router /api/penjualan/{id} [get]
 func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {

@@ -20,11 +20,8 @@ import (
 
 // @title Warehouse Inventory API
 // @version 1.0
-// @description This is a backend service for a Warehouse Inventory System.
+// @description API Documentation for Warehouse Inventory Management System
 // @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.email support@warehouse.com
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html

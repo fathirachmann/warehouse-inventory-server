@@ -13,6 +13,16 @@ type ValidationError struct {
 	Errors  map[string]string
 }
 
+type ErrorResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+type SpecificErrorResponse struct {
+	Error   string            `json:"error"`
+	Message map[string]string `json:"message"`
+}
+
 func (e *ValidationError) Error() string {
 	return e.Message
 }
@@ -28,9 +38,10 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 	var ve *ValidationError
 
 	if errors.As(err, &ve) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   ve.Message,
-			"message": ve.Errors,
+		// Return JSON response for Validation Error
+		return c.Status(fiber.StatusBadRequest).JSON(SpecificErrorResponse{
+			Error:   ve.Message,
+			Message: ve.Errors,
 		})
 	} else if errors.As(err, &e) {
 		code = e.Code
@@ -40,9 +51,9 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		log.Printf("Internal Error: %v", err)
 	}
 
-	// Return JSON response
-	return c.Status(code).JSON(fiber.Map{
-		"status":  "error",
-		"message": message,
+	// Return JSON response for Internal Server Error
+	return c.Status(code).JSON(ErrorResponse{
+		Status:  "error",
+		Message: message,
 	})
 }

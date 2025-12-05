@@ -38,12 +38,12 @@ func (h *PembelianHandler) RegisterRoute(r fiber.Router) {
 // @Accept json
 // @Produce json
 // @Param body body models.BeliHeaderRequest true "Purchase Request"
-// @Success 201 {object} models.PembelianResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 422 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 201 {object} models.PembelianResponse "Created"
+// @Failure 400 {object} middleware.ValidationError "Bad Request"
+// @Failure 422 {object} middleware.ValidationError "Unprocessable Entity"
+// @Failure 500 {object} middleware.ValidationError "Internal Server Error"
 // @Security BearerAuth
-// @Router /pembelian [post]
+// @Router /api/pembelian [post]
 func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	var req models.BeliHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -123,10 +123,10 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 // @Description Get a list of all purchase transactions
 // @Tags Pembelian
 // @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} models.PembelianResponse "OK"
+// @Failure 500 {object} middleware.ValidationError "Internal Server Error"
 // @Security BearerAuth
-// @Router /pembelian [get]
+// @Router /api/pembelian [get]
 func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPembelian()
 	if err != nil {
@@ -154,7 +154,7 @@ func (h *PembelianHandler) GetAllPembelian(c *fiber.Ctx) error {
 // @Failure 422 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Security BearerAuth
-// @Router /pembelian/{id} [get]
+// @Router /api/pembelian/{id} [get]
 func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {

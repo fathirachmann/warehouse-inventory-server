@@ -35,10 +35,10 @@ func (h *StokHandler) RegisterHistoryRoute(r fiber.Router) {
 // @Description Get a list of all stock items
 // @Tags Stok
 // @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} models.MstokResponse "OK"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
 // @Security BearerAuth
-// @Router /stok [get]
+// @Router /api/stok [get]
 func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllStok()
 	if err != nil {
@@ -73,11 +73,11 @@ func (h *StokHandler) GetAllStok(c *fiber.Ctx) error {
 // @Tags Stok
 // @Produce json
 // @Param barang_id path int true "Barang ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 422 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} models.MstokResponse "OK"
+// @Failure 422 {object} middleware.ErrorResponse "Unprocessable Entity"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
 // @Security BearerAuth
-// @Router /stok/{barang_id} [get]
+// @Router /api/stok/{barang_id} [get]
 func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
@@ -116,10 +116,10 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 // @Produce json
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} models.HistoryStokResponse "OK"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
 // @Security BearerAuth
-// @Router /history-stok [get]
+// @Router /api/history-stok [get]
 func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 
 	// Note: Pagination tidak ada di requirement. Namun, untuk frontend agar tidak load data terlalu banyak.
@@ -180,11 +180,11 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 // @Param barang_id path int true "Barang ID"
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} models.HistoryStokResponse "OK"
+// @Failure 400 {object} middleware.SpecificErrorResponse "Bad Request"
+// @Failure 500 {object} middleware.ErrorResponse "Internal Server Error"
 // @Security BearerAuth
-// @Router /history-stok/{barang_id} [get]
+// @Router /api/history-stok/{barang_id} [get]
 func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
