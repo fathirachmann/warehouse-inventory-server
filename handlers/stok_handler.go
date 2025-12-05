@@ -4,6 +4,7 @@ import (
 	"log"
 	"strconv"
 
+	"warehouse-inventory-server/models"
 	"warehouse-inventory-server/repositories"
 
 	"github.com/gofiber/fiber/v2"
@@ -93,8 +94,31 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 		})
 	}
 
+	var response []models.HistoryStokResponse
+	for _, item := range data {
+		response = append(response, models.HistoryStokResponse{
+			ID:             item.ID,
+			BarangID:       item.BarangID,
+			UserID:         item.UserID,
+			JenisTransaksi: item.JenisTransaksi,
+			Jumlah:         item.Jumlah,
+			StokSebelumnya: item.StokSebelumnya,
+			StokSesudah:    item.StokSesudah,
+			Keterangan:     item.Keterangan,
+			CreatedAt:      item.CreatedAt,
+			Barang: models.BarangSimpleResponse{
+				KodeBarang: item.MasterBarang.KodeBarang,
+				NamaBarang: item.MasterBarang.NamaBarang,
+			},
+			User: models.UserSimpleResponse{
+				Username: item.Users.Username,
+				FullName: item.Users.FullName,
+			},
+		})
+	}
+
 	return c.Status(200).JSON(fiber.Map{
-		"data":  data,
+		"data":  response,
 		"total": total,
 	})
 }
@@ -132,8 +156,35 @@ func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 		})
 	}
 
+	var response []models.HistoryStokResponse
+	for _, item := range data {
+		response = append(response, models.HistoryStokResponse{
+			ID:             item.ID,
+			BarangID:       item.BarangID,
+			UserID:         item.UserID,
+			JenisTransaksi: item.JenisTransaksi,
+			Jumlah:         item.Jumlah,
+			StokSebelumnya: item.StokSebelumnya,
+			StokSesudah:    item.StokSesudah,
+			Keterangan:     item.Keterangan,
+			CreatedAt:      item.CreatedAt,
+			Barang: models.BarangSimpleResponse{
+				KodeBarang: item.MasterBarang.KodeBarang,
+				NamaBarang: item.MasterBarang.NamaBarang,
+			},
+			User: models.UserSimpleResponse{
+				Username: item.Users.Username,
+				FullName: item.Users.FullName,
+			},
+		})
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data":  data,
-		"total": total,
+		"data": response,
+		"meta": fiber.Map{
+			"page":  page,
+			"limit": limit,
+			"total": total,
+		},
 	})
 }

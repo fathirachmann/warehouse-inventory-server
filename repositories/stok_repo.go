@@ -79,7 +79,7 @@ func (r *StokRepository) GetHistory(barangID uint, limit, offset int) ([]models.
 	if barangID != 0 {
 		q = q.Where("barang_id = ?", barangID)
 	}
-	if err := q.Limit(limit).Offset(offset).Find(&list).Error; err != nil {
+	if err := q.Order("created_at DESC").Limit(limit).Offset(offset).Find(&list).Error; err != nil {
 		return nil, 0, err
 	}
 	return list, total, nil
