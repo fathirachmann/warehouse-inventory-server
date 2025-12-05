@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"warehouse-inventory-server/middleware"
 	"warehouse-inventory-server/models"
 	"warehouse-inventory-server/repositories"
 
@@ -32,19 +33,23 @@ func (h *PenjualanHandler) RegisterRoute(r fiber.Router) {
 func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	var req models.JualHeaderRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error":   "Data input tidak valid",
-			"message": "body parsing error",
-		})
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
-	errMap := make(map[string][]string)
+	errMap := make(map[string]string)
 
 	switch {
 	case req.Customer == "":
-		errMap["customer"] = append(errMap["customer"], "Nama customer tidak boleh kosong")
+		errMap["customer"] = "Nama customer tidak boleh kosong"
 	case len(req.Details) == 0:
-		errMap["details"] = append(errMap["details"], "details tidak boleh kosong")
+		errMap["details"] = "details tidak boleh kosong"
+	}
+
+	if len(errMap) > 0 {
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors:  errMap,
+		}
 	}
 
 	var userID uint
@@ -70,10 +75,7 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	total := 0.0
 	for _, d := range req.Details {
 		if d.Qty <= 0 || d.Harga <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error":   "validation error",
-				"message": "qty and harga harus lebih dari 0",
-			})
+			return fiber.NewError(fiber.StatusBadRequest, "qty and harga harus lebih dari 0")
 		}
 		subtotal := float64(d.Qty) * d.Harga
 		total += subtotal
@@ -89,17 +91,13 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 
 	if err := h.repo.CreatePenjualan(&header, details); err != nil {
 		log.Println("Error CreatePenjualan:", err.Error(), "penjualan_handler.go:CreatePenjualan", "Error at line 82")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	created, err := h.repo.GetPenjualanByID(header.ID)
 	if err != nil {
 		log.Println("Error fetching created penjualan:", err.Error(), "penjualan_handler.go:CreatePenjualan", "Error at line 89")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	response := mapToPenjualanResponse(created)
@@ -110,9 +108,7 @@ func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPenjualan()
 	if err != nil {
 		log.Println("Error fetching all penjualan:", err.Error(), "penjualan_handler.go:GetAllPenjualan", "Error at line 104")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	var response []models.PenjualanResponse
@@ -128,17 +124,12 @@ func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error":   "Data input tidak valid",
-			"message": "parameter ID tidak valid",
-		})
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "parameter ID tidak valid")
 	}
 	data, err := h.repo.GetPenjualanByID(uint(id))
 	if err != nil {
 		log.Println("Error fetching penjualan by ID:", err.Error(), "penjualan_handler.go:GetPenjualanByID", "Error at line 121")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "Server error",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	response := mapToPenjualanResponse(data)
