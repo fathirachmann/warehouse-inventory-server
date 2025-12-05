@@ -6,7 +6,7 @@ type User struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	Username  string    `gorm:"unique;not null" json:"username"`
 	Email     string    `gorm:"unique;not null" json:"email"`
-	Password  string    `gorm:"not null" json:"password"`
+	Password  string    `gorm:"not null" json:"-"`
 	FullName  string    `json:"full_name"`
 	Role      string    `gorm:"not null" json:"role"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
