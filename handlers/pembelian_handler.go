@@ -104,13 +104,13 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 	header.Total = total
 
 	if err := h.repo.CreatePembelian(&header, details); err != nil {
-		log.Println("Error CreatePembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 84")
+		log.Println("Error CreatePembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 107")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	created, err := h.repo.GetPembelianByID(header.ID)
 	if err != nil {
-		log.Println("Error fetching created pembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 91")
+		log.Println("Error fetching created pembelian:", err.Error(), "pembelian_handler.go:CreatePembelian", "Error at line 113")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
