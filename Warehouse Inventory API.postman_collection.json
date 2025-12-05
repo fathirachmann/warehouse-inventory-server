@@ -1,0 +1,696 @@
+{
+	"info": {
+		"_postman_id": "451c02ff-2171-4b90-9f98-68facc338ae7",
+		"name": "Warehouse Inventory API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45073611",
+		"_collection_link": "https://faisalfathirachman.postman.co/workspace/Faisal-Fathi-Rachman's-Workspac~7afc6c3b-81d9-484c-82c5-c86bcc01a2ed/collection/45073611-451c02ff-2171-4b90-9f98-68facc338ae7?action=share&source=collection_link&creator=45073611"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register (admin only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"staff3\",\n  \"email\": \"staff3@warehouse.com\",\n  \"password\": \"Staff3GDC!\",\n  \"full_name\": \"Staff Gudang C\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login as admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const data = pm.response.json();",
+									"  if (data.token) {",
+									"    pm.environment.set('token', data.token);",
+									"  }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@warehouse.com\",\n  \"password\": \"Admin123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login as staff1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const data = pm.response.json();",
+									"  if (data.token) {",
+									"    pm.environment.set('token', data.token);",
+									"  }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"staff1@warehouse.com\",\n  \"password\": \"Staff1GDA!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login as staff2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const data = pm.response.json();",
+									"  if (data.token) {",
+									"    pm.environment.set('token', data.token);",
+									"  }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"staff2@warehouse.com\",\n  \"password\": \"Staff2GDB!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Barang",
+			"item": [
+				{
+					"name": "List Barang",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/barang",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"barang"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "4",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Barang",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nama_barang\": \"Lenovo ThinkPad L15\",\n  \"deskripsi\": \"Laptop Business Grade with Ryzen 5 Pro\",\n  \"satuan\": \"unit\",\n  \"harga_beli\": 50000000,\n  \"harga_jual\": 65000000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/barang",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"barang"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Barang",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nama_barang\": \"Lenovo ThinkPad L16\",\n  \"deskripsi\": \"Laptop Business Grade with Intel i9 12300 GHz\",\n  \"satuan\": \"unit\",\n  \"harga_beli\": 12000,\n  \"harga_jual\": 18000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/barang/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"barang",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Barang",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/barang/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"barang",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stok",
+			"item": [
+				{
+					"name": "List Stok",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/stok",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stok"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Stok By Barang ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/stok/:barang_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stok",
+								":barang_id"
+							],
+							"variable": [
+								{
+									"key": "barang_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "History Stok",
+			"item": [
+				{
+					"name": "List History Stok",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/history-stok?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"history-stok"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get History By Barang ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/history-stok/:barang_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"history-stok",
+								":barang_id"
+							],
+							"variable": [
+								{
+									"key": "barang_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pembelian",
+			"item": [
+				{
+					"name": "Create Pembelian",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"supplier\": \"Lenovo Indonesia\",\n  \"details\": [\n    {\n      \"barang_id\": 7,\n      \"qty\": 5,\n      \"harga\": 50000000\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pembelian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pembelian"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Pembelian",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pembelian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pembelian"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pembelian By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pembelian/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pembelian",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Penjualan",
+			"item": [
+				{
+					"name": "Create Penjualan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer\": \"Customer A\",\n  \"details\": [\n    {\n      \"barang_id\": 1,\n      \"qty\": 2,\n      \"harga\": 15000\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/penjualan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"penjualan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Penjualan",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/penjualan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"penjualan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Penjualan By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/penjualan/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"penjualan",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"value": ""
+		},
+		{
+			"value": ""
+		}
+	]
+}

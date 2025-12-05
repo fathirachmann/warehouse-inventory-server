@@ -1,0 +1,866 @@
+basePath: /
+definitions:
+  middleware.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  middleware.SpecificErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+  middleware.ValidationError:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      message:
+        type: string
+    type: object
+  models.BarangPembelianResponse:
+    properties:
+      kode_barang:
+        type: string
+      nama_barang:
+        type: string
+      satuan:
+        type: string
+    type: object
+  models.BarangPenjualanResponse:
+    properties:
+      kode_barang:
+        type: string
+      nama_barang:
+        type: string
+      satuan:
+        type: string
+    type: object
+  models.BarangRequest:
+    properties:
+      deskripsi:
+        type: string
+      harga_beli:
+        type: number
+      harga_jual:
+        type: number
+      nama_barang:
+        type: string
+      satuan:
+        type: string
+    type: object
+  models.BarangResponse:
+    properties:
+      deskripsi:
+        type: string
+      harga_beli:
+        type: number
+      harga_jual:
+        type: number
+      id:
+        type: integer
+      kode_barang:
+        type: string
+      nama_barang:
+        type: string
+      satuan:
+        type: string
+      stok:
+        type: integer
+    type: object
+  models.BarangSimpleResponse:
+    properties:
+      kode_barang:
+        type: string
+      nama_barang:
+        type: string
+    type: object
+  models.BarangStokResponse:
+    properties:
+      harga_jual:
+        type: number
+      kode_barang:
+        type: string
+      nama_barang:
+        type: string
+      satuan:
+        type: string
+    type: object
+  models.BeliDetailRequest:
+    properties:
+      barang_id:
+        type: integer
+      harga:
+        type: number
+      qty:
+        type: integer
+    type: object
+  models.BeliDetailResponse:
+    properties:
+      barang:
+        $ref: '#/definitions/models.BarangPembelianResponse'
+      barang_id:
+        type: integer
+      harga:
+        type: number
+      id:
+        type: integer
+      qty:
+        type: integer
+      subtotal:
+        type: number
+    type: object
+  models.BeliHeaderRequest:
+    properties:
+      details:
+        items:
+          $ref: '#/definitions/models.BeliDetailRequest'
+        type: array
+      supplier:
+        type: string
+    type: object
+  models.BeliHeaderResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      no_faktur:
+        type: string
+      status:
+        type: string
+      supplier:
+        type: string
+      total:
+        type: number
+      user:
+        $ref: '#/definitions/models.UserSimpleResponse'
+      user_id:
+        type: integer
+    type: object
+  models.CreatedBarangResponse:
+    properties:
+      deskripsi:
+        type: string
+      harga_beli:
+        type: number
+      harga_jual:
+        type: number
+      id:
+        type: integer
+      kode_barang:
+        type: string
+      nama_barang:
+        type: string
+      satuan:
+        type: string
+    type: object
+  models.DeleteBarangResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.HistoryStokResponse:
+    properties:
+      barang:
+        $ref: '#/definitions/models.BarangSimpleResponse'
+      barang_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      jenis_transaksi:
+        type: string
+      jumlah:
+        type: integer
+      keterangan:
+        type: string
+      stok_sebelum:
+        type: integer
+      stok_sesudah:
+        type: integer
+      user:
+        $ref: '#/definitions/models.UserSimpleResponse'
+      user_id:
+        type: integer
+    type: object
+  models.JualDetailRequest:
+    properties:
+      barang_id:
+        type: integer
+      harga:
+        type: number
+      qty:
+        type: integer
+    type: object
+  models.JualDetailResponse:
+    properties:
+      barang:
+        $ref: '#/definitions/models.BarangPenjualanResponse'
+      barang_id:
+        type: integer
+      harga:
+        type: number
+      id:
+        type: integer
+      qty:
+        type: integer
+      subtotal:
+        type: number
+    type: object
+  models.JualHeaderRequest:
+    properties:
+      customer:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/models.JualDetailRequest'
+        type: array
+    type: object
+  models.JualHeaderResponse:
+    properties:
+      created_at:
+        type: string
+      customer:
+        type: string
+      id:
+        type: integer
+      no_faktur:
+        type: string
+      status:
+        type: string
+      total:
+        type: number
+      user:
+        $ref: '#/definitions/models.UserSimpleResponse'
+      user_id:
+        type: integer
+    type: object
+  models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  models.MstokResponse:
+    properties:
+      barang:
+        $ref: '#/definitions/models.BarangStokResponse'
+      barang_id:
+        type: integer
+      id:
+        type: integer
+      stok_akhir:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.PembelianResponse:
+    properties:
+      details:
+        items:
+          $ref: '#/definitions/models.BeliDetailResponse'
+        type: array
+      header:
+        $ref: '#/definitions/models.BeliHeaderResponse'
+    type: object
+  models.PenjualanResponse:
+    properties:
+      details:
+        items:
+          $ref: '#/definitions/models.JualDetailResponse'
+        type: array
+      header:
+        $ref: '#/definitions/models.JualHeaderResponse'
+    type: object
+  models.RegisterRequest:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.RegisterResponse:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserSimpleResponse:
+    properties:
+      full_name:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Documentation for Warehouse Inventory Management System
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Warehouse Inventory API
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.SpecificErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: Login user
+      tags:
+      - Auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new staff user. Only admin can perform this action.
+      parameters:
+      - description: Register Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.SpecificErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Register new user (Admin only)
+      tags:
+      - Auth
+  /api/barang:
+    get:
+      consumes:
+      - application/json
+      description: Mendapatkan daftar seluruh barang
+      parameters:
+      - description: Search by name
+        in: query
+        name: search
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BarangResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ValidationError'
+      security:
+      - BearerAuth: []
+      summary: Get all barang
+      tags:
+      - Barang
+    post:
+      consumes:
+      - application/json
+      description: Membuat barang baru
+      parameters:
+      - description: Barang Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.BarangRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CreatedBarangResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.SpecificErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ValidationError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create new barang
+      tags:
+      - Barang
+  /api/barang/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Menghapus barang berdasarkan ID
+      parameters:
+      - description: Barang ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DeleteBarangResponse'
+        "400":
+          description: Bad Request (Stock > 0)
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete barang by ID
+      tags:
+      - Barang
+    get:
+      consumes:
+      - application/json
+      description: Mendapatkan detail barang berdasarkan ID
+      parameters:
+      - description: Barang ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BarangResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.SpecificErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get barang by ID
+      tags:
+      - Barang
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui detail barang berdasarkan ID
+      parameters:
+      - description: Barang ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Barang Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.BarangRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BarangResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.SpecificErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.SpecificErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ValidationError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update barang by ID
+      tags:
+      - Barang
+  /api/history-stok:
+    get:
+      description: Get a list of stock history with pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.HistoryStokResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all stock history
+      tags:
+      - History Stok
+  /api/history-stok/{barang_id}:
+    get:
+      description: Get stock history for a specific barang with pagination
+      parameters:
+      - description: Barang ID
+        in: path
+        name: barang_id
+        required: true
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.HistoryStokResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.SpecificErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get stock history by barang ID
+      tags:
+      - History Stok
+  /api/pembelian:
+    get:
+      description: Get a list of all purchase transactions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PembelianResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ValidationError'
+      security:
+      - BearerAuth: []
+      summary: Get all purchases
+      tags:
+      - Pembelian
+    post:
+      consumes:
+      - application/json
+      description: Create a new purchase transaction
+      parameters:
+      - description: Purchase Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.BeliHeaderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.PembelianResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ValidationError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ValidationError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ValidationError'
+      security:
+      - BearerAuth: []
+      summary: Create new purchase
+      tags:
+      - Pembelian
+  /api/pembelian/{id}:
+    get:
+      description: Get details of a specific purchase transaction
+      parameters:
+      - description: Purchase ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PembelianResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get purchase by ID
+      tags:
+      - Pembelian
+  /api/penjualan:
+    get:
+      description: Get a list of all sale transactions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PenjualanResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all sales
+      tags:
+      - Penjualan
+    post:
+      consumes:
+      - application/json
+      description: Create a new sale transaction
+      parameters:
+      - description: Sale Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.JualHeaderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.PenjualanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create new sale
+      tags:
+      - Penjualan
+  /api/penjualan/{id}:
+    get:
+      description: Get details of a specific sale transaction
+      parameters:
+      - description: Sale ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PenjualanResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get sale by ID
+      tags:
+      - Penjualan
+  /api/stok:
+    get:
+      description: Get a list of all stock items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MstokResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all stock
+      tags:
+      - Stok
+  /api/stok/{barang_id}:
+    get:
+      description: Get stock details for a specific barang
+      parameters:
+      - description: Barang ID
+        in: path
+        name: barang_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MstokResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get stock by barang ID
+      tags:
+      - Stok
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

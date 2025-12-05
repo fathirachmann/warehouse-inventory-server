@@ -1,0 +1,81 @@
+package models
+
+import "time"
+
+type JualHeader struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	NoFaktur  string    `gorm:"type:varchar(100);unique;not null" json:"no_faktur"`
+	Customer  string    `gorm:"type:varchar(200);not null" json:"customer"`
+	Total     float64   `gorm:"type:decimal(15,2);default:0" json:"total"`
+	UserID    uint      `gorm:"not null" json:"user_id"`
+	Status    string    `gorm:"type:varchar(50);default:'selesai'" json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+
+	// Associations
+	Details []JualDetail `gorm:"foreignKey:JualHeaderID" json:"details,omitempty"` // JualHeader one to many JualDetail
+	User    *User        `gorm:"foreignKey:UserID" json:"user,omitempty"`          // JualHeader many to one User
+}
+
+func (JualHeader) TableName() string {
+	return "jual_header"
+}
+
+type JualDetail struct {
+	ID           uint    `gorm:"primaryKey" json:"id"`
+	JualHeaderID uint    `gorm:"not null" json:"jual_header_id"`
+	BarangID     uint    `gorm:"not null" json:"barang_id"`
+	Qty          int     `gorm:"not null" json:"qty"`
+	Harga        float64 `gorm:"type:decimal(15,2);not null" json:"harga"`
+	Subtotal     float64 `gorm:"type:decimal(15,2);not null" json:"subtotal"`
+
+	// Associations
+	MasterBarang *MasterBarang `gorm:"foreignKey:BarangID" json:"barang,omitempty"` // JualDetail many to one MasterBarang
+}
+
+func (JualDetail) TableName() string {
+	return "jual_detail"
+}
+
+// Request structs for penjualan API
+type JualDetailRequest struct {
+	BarangID uint    `json:"barang_id"`
+	Qty      int     `json:"qty"`
+	Harga    float64 `json:"harga"`
+}
+
+type JualHeaderRequest struct {
+	Customer string              `json:"customer"`
+	Details  []JualDetailRequest `json:"details"`
+}
+
+// Response structs for penjualan API
+type JualHeaderResponse struct {
+	ID        uint               `json:"id"`
+	NoFaktur  string             `json:"no_faktur"`
+	Customer  string             `json:"customer"`
+	Total     float64            `json:"total"`
+	UserID    uint               `json:"user_id"`
+	Status    string             `json:"status"`
+	CreatedAt time.Time          `json:"created_at"`
+	User      UserSimpleResponse `json:"user"`
+}
+
+type JualDetailResponse struct {
+	ID       uint                    `json:"id"`
+	BarangID uint                    `json:"barang_id"`
+	Qty      int                     `json:"qty"`
+	Harga    float64                 `json:"harga"`
+	Subtotal float64                 `json:"subtotal"`
+	Barang   BarangPenjualanResponse `json:"barang"`
+}
+
+type PenjualanResponse struct {
+	Header  JualHeaderResponse   `json:"header"`
+	Details []JualDetailResponse `json:"details"`
+}
+
+type BarangPenjualanResponse struct {
+	KodeBarang string `json:"kode_barang"`
+	NamaBarang string `json:"nama_barang"`
+	Satuan     string `json:"satuan"`
+}
