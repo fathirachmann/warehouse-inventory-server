@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -13,14 +14,16 @@ import (
 )
 
 type PenjualanHandler struct {
-	repo     *repositories.PenjualanRepository
-	stokRepo *repositories.StokRepository
+	repo       *repositories.PenjualanRepository
+	stokRepo   *repositories.StokRepository
+	barangRepo *repositories.BarangRepository
 }
 
-func NewPenjualanHandler(repo *repositories.PenjualanRepository, stokRepo *repositories.StokRepository) *PenjualanHandler {
+func NewPenjualanHandler(repo *repositories.PenjualanRepository, stokRepo *repositories.StokRepository, barangRepo *repositories.BarangRepository) *PenjualanHandler {
 	return &PenjualanHandler{
-		repo:     repo,
-		stokRepo: stokRepo,
+		repo:       repo,
+		stokRepo:   stokRepo,
+		barangRepo: barangRepo,
 	}
 }
 
@@ -90,6 +93,16 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 		if d.Qty <= 0 || d.Harga <= 0 {
 			return fiber.NewError(fiber.StatusBadRequest, "qty and harga harus lebih dari 0")
 		}
+
+		// Validasi harga jual sesuai dengan harga di master barang
+		barang, err := h.barangRepo.GetByID(d.BarangID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusNotFound, "Barang tidak ditemukan")
+		}
+		if d.Harga != barang.HargaJual {
+			return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("Harga jual %s tidak sesuai (Expected: %.2f)", barang.NamaBarang, barang.HargaJual))
+		}
+
 		subtotal := float64(d.Qty) * d.Harga
 		total += subtotal
 		detail := models.JualDetail{

@@ -104,14 +104,14 @@ func main() {
 
 	// Pembelian routes
 	pembelianRepo := repositories.NewPembelianRepository(db)
-	pembelianHandler := handlers.NewPembelianHandler(pembelianRepo, stokRepo)
+	pembelianHandler := handlers.NewPembelianHandler(pembelianRepo, stokRepo, barangRepo)
 
 	pembelianRoute := app.Group("/api/pembelian", middleware.Authentication())
 	pembelianHandler.RegisterRoute(pembelianRoute)
 
 	// Penjualan routes
 	penjualanRepo := repositories.NewPenjualanRepository(db)
-	penjualanHandler := handlers.NewPenjualanHandler(penjualanRepo, stokRepo)
+	penjualanHandler := handlers.NewPenjualanHandler(penjualanRepo, stokRepo, barangRepo)
 
 	penjualanRoute := app.Group("/api/penjualan", middleware.Authentication())
 	penjualanHandler.RegisterRoute(penjualanRoute)

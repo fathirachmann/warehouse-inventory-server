@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -13,14 +14,16 @@ import (
 )
 
 type PembelianHandler struct {
-	repo     *repositories.PembelianRepository
-	stokRepo *repositories.StokRepository
+	repo       *repositories.PembelianRepository
+	stokRepo   *repositories.StokRepository
+	barangRepo *repositories.BarangRepository
 }
 
-func NewPembelianHandler(repo *repositories.PembelianRepository, stokRepo *repositories.StokRepository) *PembelianHandler {
+func NewPembelianHandler(repo *repositories.PembelianRepository, stokRepo *repositories.StokRepository, barangRepo *repositories.BarangRepository) *PembelianHandler {
 	return &PembelianHandler{
-		repo:     repo,
-		stokRepo: stokRepo,
+		repo:       repo,
+		stokRepo:   stokRepo,
+		barangRepo: barangRepo,
 	}
 }
 
@@ -91,6 +94,16 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 		if d.Qty <= 0 || d.Harga <= 0 {
 			return fiber.NewError(fiber.StatusBadRequest, "qty dan harga tidak boleh kurang dari sama dengan 0")
 		}
+
+		// Validasi harga beli sesuai dengan harga di master barang
+		barang, err := h.barangRepo.GetByID(d.BarangID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusNotFound, "Barang tidak ditemukan")
+		}
+		if d.Harga != barang.HargaBeli {
+			return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("Harga beli %s tidak sesuai (Expected: %.2f)", barang.NamaBarang, barang.HargaJual))
+		}
+
 		subtotal := float64(d.Qty) * d.Harga
 		total += subtotal
 		detail := models.BeliDetail{
