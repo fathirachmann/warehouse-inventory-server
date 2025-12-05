@@ -13,7 +13,6 @@ type HistoryStok struct {
 	StokSesudah    int       `gorm:"not null" json:"stok_sesudah"`
 	Keterangan     string    `json:"keterangan"`
 	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt      time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Associations
 	MasterBarang MasterBarang `gorm:"foreignKey:BarangID;references:ID" json:"barang"` // HistoryStok many to one MasterBarang
