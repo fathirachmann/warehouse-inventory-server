@@ -32,7 +32,7 @@ func Authentication() fiber.Handler {
 		secret := os.Getenv("JWT_SECRET")
 
 		if secret == "" {
-			log.Println("Environment variable error: JWT_SECRET is empty", "middleware.go:Authentication", "Error at line 32")
+			log.Println("Environment variable error: JWT_SECRET is empty", "middleware.go:Authentication", "Error at line 34")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Server error"})
 		}
 

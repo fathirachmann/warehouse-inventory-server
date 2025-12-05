@@ -116,13 +116,13 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 	header.Total = total
 
 	if err := h.repo.CreatePenjualan(&header, details); err != nil {
-		log.Println("Error CreatePenjualan:", err.Error(), "penjualan_handler.go:CreatePenjualan", "Error at line 82")
+		log.Println("Error CreatePenjualan:", err.Error(), "penjualan_handler.go:CreatePenjualan", "Error at line 118")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
 	created, err := h.repo.GetPenjualanByID(header.ID)
 	if err != nil {
-		log.Println("Error fetching created penjualan:", err.Error(), "penjualan_handler.go:CreatePenjualan", "Error at line 89")
+		log.Println("Error fetching created penjualan:", err.Error(), "penjualan_handler.go:CreatePenjualan", "Error at line 123")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
@@ -142,7 +142,7 @@ func (h *PenjualanHandler) CreatePenjualan(c *fiber.Ctx) error {
 func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 	data, err := h.repo.GetAllPenjualan()
 	if err != nil {
-		log.Println("Error fetching all penjualan:", err.Error(), "penjualan_handler.go:GetAllPenjualan", "Error at line 104")
+		log.Println("Error fetching all penjualan:", err.Error(), "penjualan_handler.go:GetAllPenjualan", "Error at line 143")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
@@ -174,7 +174,7 @@ func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 	}
 	data, err := h.repo.GetPenjualanByID(uint(id))
 	if err != nil {
-		log.Println("Error fetching penjualan by ID:", err.Error(), "penjualan_handler.go:GetPenjualanByID", "Error at line 121")
+		log.Println("Error fetching penjualan by ID:", err.Error(), "penjualan_handler.go:GetPenjualanByID", "Error at line 175")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
