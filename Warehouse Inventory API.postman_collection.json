@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "9731e58c-27f6-49ac-b03c-1dd64f3ff462",
+		"_postman_id": "451c02ff-2171-4b90-9f98-68facc338ae7",
 		"name": "Warehouse Inventory API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "45073611",
-		"_collection_link": "https://faisalfathirachman.postman.co/workspace/Faisal-Fathi-Rachman's-Workspac~7afc6c3b-81d9-484c-82c5-c86bcc01a2ed/collection/45073611-9731e58c-27f6-49ac-b03c-1dd64f3ff462?action=share&source=collection_link&creator=45073611"
+		"_collection_link": "https://faisalfathirachman.postman.co/workspace/Faisal-Fathi-Rachman's-Workspac~7afc6c3b-81d9-484c-82c5-c86bcc01a2ed/collection/45073611-451c02ff-2171-4b90-9f98-68facc338ae7?action=share&source=collection_link&creator=45073611"
 	},
 	"item": [
 		{
@@ -493,7 +493,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"supplier\": \"Supplier A\",\n  \"details\": [\n    {\n      \"barang_id\": 6,\n      \"qty\": 10,\n      \"harga\": 50000000\n    }\n  ]\n}"
+							"raw": "{\n  \"supplier\": \"Lenovo Indonesia\",\n  \"details\": [\n    {\n      \"barang_id\": 7,\n      \"qty\": 5,\n      \"harga\": 50000000\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/pembelian",
