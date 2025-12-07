@@ -155,16 +155,30 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	errMap := make(map[string]string)
 
 	if req.Email == "" {
-		errMap["email"] = "email tidak boleh kosong"
-	} else {
-		emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
-		if !emailRegex.MatchString(req.Email) {
-			errMap["email"] = "Format email tidak valid"
-		}
+		errMap["email"] = "Email tidak boleh kosong"
 	}
 
 	if req.Password == "" {
-		errMap["password"] = "password tidak boleh kosong"
+		errMap["password"] = "Password tidak boleh kosong"
+	}
+
+	if len(errMap) > 0 {
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors:  errMap,
+		}
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(req.Email) {
+		errMap["email"] = "Format email tidak valid"
+	}
+
+	if len(errMap) > 0 {
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors:  errMap,
+		}
 	}
 
 	// Authenticate user
