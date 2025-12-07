@@ -25,6 +25,19 @@ func (r *PembelianRepository) CreatePembelian(header *models.BeliHeader, details
 		return tx.Error
 	}
 
+	// Simpan header pembelian terlebih dahulu untuk mendapatkan ID
+	if err := tx.Create(header).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Generate NoFaktur berdasarkan ID: BLI + 3 digit (misal BLI001)
+	header.NoFaktur = fmt.Sprintf("BLI%03d", header.ID)
+	if err := tx.Model(header).Update("no_faktur", header.NoFaktur).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	// Update stok dan buat history untuk setiap detail pembelian
 	for i := range details {
 		var stok models.Mstok
@@ -67,23 +80,8 @@ func (r *PembelianRepository) CreatePembelian(header *models.BeliHeader, details
 			tx.Rollback()
 			return err
 		}
-	}
 
-	// Simpan header pembelian terlebih dahulu untuk mendapatkan ID
-	if err := tx.Create(header).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Generate NoFaktur berdasarkan ID: BLI + 3 digit (misal BLI001)
-	header.NoFaktur = fmt.Sprintf("BLI%03d", header.ID)
-	if err := tx.Model(header).Update("no_faktur", header.NoFaktur).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Set BeliHeaderID untuk setiap detail pembelian
-	for i := range details {
+		// Set BeliHeaderID untuk detail
 		details[i].BeliHeaderID = header.ID
 	}
 	if len(details) > 0 {
@@ -105,7 +103,7 @@ func (r *PembelianRepository) CreatePembelian(header *models.BeliHeader, details
 // GetAllPembelian mengambil semua data pembelian beserta detailnya
 func (r *PembelianRepository) GetAllPembelian() ([]models.BeliHeader, error) {
 	var headers []models.BeliHeader
-	if err := r.db.Preload("Details.MasterBarang").Preload("User").Find(&headers).Error; err != nil {
+	if err := r.db.Preload("Details.MasterBarang").Preload("User").Order("created_at desc").Find(&headers).Error; err != nil {
 		return nil, err
 	}
 	return headers, nil
