@@ -155,11 +155,11 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	errMap := make(map[string]string)
 
 	if req.Email == "" {
-		errMap["email"] = "email tidak boleh kosong"
+		errMap["email"] = "Email tidak boleh kosong"
 	}
 
 	if req.Password == "" {
-		errMap["password"] = "password tidak boleh kosong"
+		errMap["password"] = "Password tidak boleh kosong"
 	}
 
 	if len(errMap) > 0 {
