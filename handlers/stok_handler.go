@@ -82,13 +82,12 @@ func (h *StokHandler) GetStokByBarangID(c *fiber.Ctx) error {
 	barangIDStr := c.Params("barang_id")
 	barangID64, err := strconv.ParseUint(barangIDStr, 10, 64)
 	if err != nil {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "Parameter barang_id tidak valid")
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
-	stok, err := h.repo.GetOrCreateByBarangID(uint(barangID64))
+	stok, err := h.repo.GetByBarangID(uint(barangID64))
 	if err != nil {
-		log.Println("Error fetching stok by barang ID:", err.Error(), "stok_handler.go:GetStokByBarangID", "Error at line 88")
-		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
+		return fiber.NewError(fiber.StatusBadRequest, "Barang tidak ditemukan")
 	}
 
 	response := models.MstokResponse{
@@ -139,7 +138,7 @@ func (h *StokHandler) GetHistoryAll(c *fiber.Ctx) error {
 	offset := (page - 1) * limit
 	data, total, err := h.repo.GetHistory(0, limit, offset)
 	if err != nil {
-		log.Println("Error fetching all history stok:", err.Error(), "stok_handler.go:GetHistoryAll", "Error at line 140")
+		log.Println("Error fetching all history stok:", err.Error(), "stok_handler.go:GetHistoryAll", "Error at line 150")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 
@@ -193,6 +192,12 @@ func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid barang_id")
 	}
 
+	// Check if barang exists
+	_, err = h.repo.GetByBarangID(uint(barangID64))
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Barang tidak ditemukan")
+	}
+
 	pageStr := c.Query("page", "1")
 	limitStr := c.Query("limit", "10")
 
@@ -208,7 +213,7 @@ func (h *StokHandler) GetHistoryByBarangID(c *fiber.Ctx) error {
 	offset := (page - 1) * limit
 	data, total, err := h.repo.GetHistory(uint(barangID64), limit, offset)
 	if err != nil {
-		log.Println("Error fetching history by barang ID:", err.Error(), "stok_handler.go:GetHistoryByBarangID", "Error at line 209")
+		log.Println("Error fetching history by barang ID:", err.Error(), "stok_handler.go:GetHistoryByBarangID", "Error at line 219")
 		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
 	}
 

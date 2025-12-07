@@ -170,12 +170,12 @@ func (h *PenjualanHandler) GetAllPenjualan(c *fiber.Ctx) error {
 func (h *PenjualanHandler) GetPenjualanByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil || id <= 0 {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "parameter ID tidak valid")
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 	data, err := h.repo.GetPenjualanByID(uint(id))
 	if err != nil {
 		log.Println("Error fetching penjualan by ID:", err.Error(), "penjualan_handler.go:GetPenjualanByID", "Error at line 175")
-		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
+		return fiber.NewError(fiber.StatusNotFound, "Barang tidak ditemukan")
 	}
 
 	response := mapToPenjualanResponse(data)
