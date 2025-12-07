@@ -169,12 +169,26 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 
 	// Authenticate user
 	user, err := h.repo.FindByEmail(req.Email)
-	if err != nil {
-		errMap["email"] = "Email atau password salah"
+	if err != nil || user == nil {
+		// Jangan lanjut ke pengecekan password jika user tidak ditemukan
+		// Agar tidak terjadi panic nil pointer dan pesan tetap generic
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors: map[string]string{
+				"email":    "Email atau password salah",
+				"password": "Email atau password salah",
+			},
+		}
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		errMap["password"] = "Email atau password salah"
+		return &middleware.ValidationError{
+			Message: "validation error",
+			Errors: map[string]string{
+				"email":    "Email atau password salah",
+				"password": "Email atau password salah",
+			},
+		}
 	}
 
 	if len(errMap) > 0 {
