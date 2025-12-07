@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"errors"
-
 	"warehouse-inventory-server/models"
 
 	"gorm.io/gorm"
@@ -16,30 +14,30 @@ func NewStokRepository(db *gorm.DB) *StokRepository {
 	return &StokRepository{db: db}
 }
 
-// GetOrCreateByBarangID mengambil stok berdasarkan barangID, atau membuat entri baru jika tidak ada
-func (r *StokRepository) GetOrCreateByBarangID(barangID uint) (*models.Mstok, error) {
+// GetByBarangID mengambil stok berdasarkan barangID
+func (r *StokRepository) GetByBarangID(barangID uint) (*models.Mstok, error) {
 	var stok models.Mstok
-
 	err := r.db.Preload("MasterBarang").Where("barang_id = ?", barangID).First(&stok).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		stok = models.Mstok{
-			BarangID:  barangID,
-			StokAkhir: 0,
-		}
-		if errCreate := r.db.Create(&stok).Error; errCreate != nil {
-			return nil, errCreate
-		}
-		// Load relation for the newly created record
-		if errLoad := r.db.Preload("MasterBarang").First(&stok, stok.ID).Error; errLoad != nil {
-			// If loading fails, just return the stok without relation (or handle error)
-			// For now, we can ignore or log, but returning is fine.
-		}
-		return &stok, nil
-	}
 	if err != nil {
 		return nil, err
 	}
+	return &stok, nil
+}
 
+// CreateStok membuat entri stok baru untuk barangID
+func (r *StokRepository) CreateStok(barangID uint) (*models.Mstok, error) {
+	stok := models.Mstok{
+		BarangID:  barangID,
+		StokAkhir: 0,
+	}
+	if err := r.db.Create(&stok).Error; err != nil {
+		return nil, err
+	}
+	// Load relation for the newly created record
+	if err := r.db.Preload("MasterBarang").First(&stok, stok.ID).Error; err != nil {
+		// If loading fails, just return the stok without relation
+		return &stok, nil
+	}
 	return &stok, nil
 }
 
