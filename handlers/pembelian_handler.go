@@ -100,8 +100,9 @@ func (h *PembelianHandler) CreatePembelian(c *fiber.Ctx) error {
 		if err != nil {
 			return fiber.NewError(fiber.StatusNotFound, "Barang tidak ditemukan")
 		}
+		log.Println("Validating harga beli:", d.Harga, "against master harga beli:", barang.HargaBeli)
 		if d.Harga != barang.HargaBeli {
-			return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("Harga beli %s tidak sesuai (Expected: %.2f)", barang.NamaBarang, barang.HargaJual))
+			return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("Harga beli %s tidak sesuai (Expected: %.2f)", barang.NamaBarang, barang.HargaBeli))
 		}
 
 		subtotal := float64(d.Qty) * d.Harga
@@ -175,8 +176,8 @@ func (h *PembelianHandler) GetPembelianByID(c *fiber.Ctx) error {
 	}
 	data, err := h.repo.GetPembelianByID(uint(id))
 	if err != nil {
-		log.Println("Error fetching pembelian by ID:", err.Error(), "pembelian_handler.go:GetPembelianByID", "Error at line 176")
-		return fiber.NewError(fiber.StatusInternalServerError, "Server error")
+		log.Println("Error fetching all pembelian:", err.Error(), "pembelian_handler.go:GetAllPembelian", "Error at line 144")
+		return fiber.NewError(fiber.StatusInternalServerError, "Barang tidak ditemukan")
 	}
 
 	response := mapToPembelianResponse(data)

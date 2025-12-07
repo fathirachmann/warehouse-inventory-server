@@ -14,7 +14,7 @@ func Authentication() fiber.Handler {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error":   "Header Authorization error",
+				"error":   "Unauthorized",
 				"message": "header Authorization tidak ditemukan"})
 		}
 
@@ -24,7 +24,7 @@ func Authentication() fiber.Handler {
 			tokenString = authHeader[7:]
 		} else {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error":   "Header Authorization error",
+				"error":   "Unauthorized",
 				"message": "Token tidak valid atau hilang",
 			})
 		}
@@ -43,7 +43,10 @@ func Authentication() fiber.Handler {
 			return []byte(secret), nil
 		})
 		if err != nil || !parsed.Valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "	"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error":   "Unauthorized",
+				"message": "Token tidak valid",
+			})
 		}
 
 		// Simpan claims ke fiber context

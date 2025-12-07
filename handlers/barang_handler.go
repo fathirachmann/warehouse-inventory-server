@@ -125,17 +125,23 @@ func (h *BarangHandler) CreateBarang(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 
+	// Create Barang validations
 	errMap := make(map[string]string)
 
-	switch {
-	case req.NamaBarang == "":
+	if req.NamaBarang == "" {
 		errMap["nama_barang"] = "nama barang tidak boleh kosong"
-	case req.Satuan == "":
+	}
+
+	if req.Satuan == "" {
 		errMap["satuan"] = "satuan tidak boleh kosong"
-	case req.HargaBeli <= 0:
-		errMap["harga_beli"] = "harga beli harus lebih dari 0"
-	case req.HargaJual <= 0:
-		errMap["harga_jual"] = "harga jual harus lebih dari 0"
+	}
+
+	if req.HargaBeli < 0 {
+		errMap["harga_beli"] = "harga beli tidak boleh kurang dari 0"
+	}
+
+	if req.HargaJual < 0 {
+		errMap["harga_jual"] = "harga jual tidak boleh kurang dari 0"
 	}
 
 	if len(errMap) > 0 {
@@ -189,7 +195,7 @@ func (h *BarangHandler) CreateBarang(c *fiber.Ctx) error {
 func (h *BarangHandler) UpdateBarangByID(c *fiber.Ctx) error {
 	id64, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "Parameter ID tidak valid")
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 	barang, err := h.repo.GetByID(uint(id64))
 	if err != nil {
@@ -261,7 +267,7 @@ func (h *BarangHandler) UpdateBarangByID(c *fiber.Ctx) error {
 func (h *BarangHandler) DeleteBarangByID(c *fiber.Ctx) error {
 	id64, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "Parameter ID tidak valid")
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "Data input tidak valid")
 	}
 	if err := h.repo.Delete(uint(id64)); err != nil {
 		if err.Error() == "barang tidak ditemukan" {
