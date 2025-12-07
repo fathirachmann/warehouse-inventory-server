@@ -206,6 +206,8 @@ func mapToPembelianResponse(p *models.BeliHeader) models.PembelianResponse {
 			ID:        p.ID,
 			NoFaktur:  p.NoFaktur,
 			UserID:    p.UserID,
+			Supplier:  p.Supplier,
+			Status:    p.Status,
 			User:      models.UserSimpleResponse{Username: p.User.Username, FullName: p.User.FullName},
 			Total:     p.Total,
 			CreatedAt: p.CreatedAt,
