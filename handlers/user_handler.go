@@ -167,21 +167,21 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 		errMap["password"] = "password tidak boleh kosong"
 	}
 
+	// Authenticate user
+	user, err := h.repo.FindByEmail(req.Email)
+	if err != nil {
+		errMap["email"] = "Email atau password salah"
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		errMap["password"] = "Email atau password salah"
+	}
+
 	if len(errMap) > 0 {
 		return &middleware.ValidationError{
 			Message: "validation error",
 			Errors:  errMap,
 		}
-	}
-
-	// Authenticate user
-	user, err := h.repo.FindByEmail(req.Email)
-	if err != nil {
-		return fiber.NewError(fiber.StatusUnauthorized, "Email atau password salah")
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return fiber.NewError(fiber.StatusUnauthorized, "Email atau password salah")
 	}
 
 	// JWT generation
